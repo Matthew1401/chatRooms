@@ -1,4 +1,3 @@
-// Import required modules
 const express = require("express");
 const http = require("http");
 const WebSocket = require("ws");
@@ -17,24 +16,28 @@ server.listen(3000, () => {
   console.log("Websocket server started on port 3000");
 });
 
+const connectedUsers = []
+
 websocketServer.on('connection', (socket) => {
-  // Log a message when a new client connects
   console.log('Client connected.');
-  // Listen for incoming WebSocket messages
+
   socket.on('message', (data) => {
-    console.log('data received')
+    data = JSON.parse(data)
+    if (data.status == 'login') {
+      connectedUsers.push([data.username, data.email])
+      console.log(connectedUsers)
+    }
+    console.log("message",data.toString())
 
    // Broadcast the message to all connected clients
-    // websocketServer.clients.forEach(function each(client) {
-    //   if (client !== socket && client.readyState === WebSocket.OPEN) {
-    //     client.send(data.toString());
-    //     console.log("message",data.toString())
-    //   }
-    // });
+    websocketServer.clients.forEach(function each(client) {
+      if (client !== socket && client.readyState === WebSocket.OPEN) {
+        client.send(data.toString());
+        console.log("message",data.toString())
+      }
+    });
   });
-  // Listen for WebSocket connection close events
   socket.on('close', () => {
-    // Log a message when a client disconnects
     console.log('------------------------------------');
   });
 });

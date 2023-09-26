@@ -56,7 +56,7 @@
   main {
     width: 100vw;
     height: 100vh;
-    font-size: 20px;
+    font-size: 25px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -103,6 +103,7 @@
   }
 
   .form-container:hover {
+    transform: translateY(-5px);
     box-shadow: rgba(165, 16, 110, 0.4) 5px 5px 5px 5px, rgba(104, 7, 68, 0.3) 10px 10px 10px 10px, rgba(104, 8, 69, 0.2) 15px 15px 15px 15px, rgba(99, 5, 64, 0.1) 20px 20px 20px 20px, rgba(107, 6, 70, 0.05) 25px 25px 25px 25px;  
   }
 
@@ -120,7 +121,7 @@
     margin-top: 20px;
     border: 2px solid rgba(122,0,117,1);
     border-radius: 5px;
-    width: 13em;
+    width: 10em;
     height: 2em;
     font-size: 1em;
     cursor: pointer;

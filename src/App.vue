@@ -1,16 +1,18 @@
 <template>
-  <RouterView />
+  <RouterView :socket="socket"/>
 </template>
 <!-- 
   Done TODO: 1.Na początek stworzyć formularz do podania imienia/nicku oraz maila.
-  
+  Done TODO: 4.Stworzyć unikalne id dla każdego użytkownika. Niech to będzie email. Po odłączeniu z sesji dane użytkownika są usuwane z tabeli.
+
   TODO: 2.Przekierować użytkownika do strony z wybieraniem pokoi. Stworzyć taką stronę, gdzie można wybierać pokój lub go stworzyć.
   TODO: 3.Zsynchronizować to z serwerem. Stworzony pokój musi pojawiać się u innych użytkowników.
-  TODO: 4.Stworzyć unikalne id dla każdego użytkownika. Niech to będzie email. Po odłączeniu z sesji dane użytkownika są usuwane z tabeli.
  -->
 
 <script setup>
   import { RouterView } from 'vue-router'
+
+  const socket = new WebSocket('ws://localhost:3000')
 
   // const username = ref('')
   // const text = ref('')

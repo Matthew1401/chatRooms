@@ -4,7 +4,7 @@
       <p>Welcome in chat rooms application. To start enter your nickname and email.</p>
     </div>
     <div class="form-container">
-      <h1>Enter your data</h1>
+      <h1>Sign up</h1>
       <form @submit.prevent="submitForm">
         <input type="text" v-model="data.nickname" placeholder="Enter your name"> <br>
         <input type="email" v-model="data.email" placeholder="Enter your email"> <br>
@@ -17,11 +17,11 @@
 </template>
 
 <script setup>
-  import { reactive } from 'vue'
+  import { reactive, defineProps } from 'vue'
   import Footer from '../components/Footer.vue'
 
-  const socket = new WebSocket('ws://localhost:3000')
-  
+  const {socket} = defineProps(['socket'])
+
   const data = reactive({
     validData: '',
     email: '',
@@ -37,16 +37,18 @@
         data.validData = 'Please enter a valid email address.'
       }
       else {
-        const messageData = { status: 'login', username: data.nickname, email: data.email};
-        console.log(messageData)
-        socket.send(JSON.stringify(messageData))
+        data.validData = ''
+        const loginData = { status: 'login', username: data.nickname, email: data.email};
+        console.log(loginData)
+        socket.send(JSON.stringify(loginData))
       }
     }
   }
 
+  // W tym miejsu tylko error jest możliwą wiadomością
   socket.onmessage = (event) => {
     const message = JSON.parse(event.data);
-    console.log(message)
+    data.validData = message.message;
   }
 </script>
 
@@ -79,6 +81,7 @@
     color: #FFFFFF;
     font-family: Cursive;
     margin-top: 45px;
+    margin-bottom: 55px;
     font-weight: 700;
     font-size: 2em;
     text-shadow:
@@ -108,8 +111,8 @@
     padding: 2px;
     border: none;
     border-radius: 5px;
-    height: 1.6em;
-    width: 15em;
+    height: 2.5em;
+    width: 18em;
     font-family: Cursive;
   }
 
@@ -117,9 +120,9 @@
     margin-top: 20px;
     border: 2px solid rgba(122,0,117,1);
     border-radius: 5px;
-    width: 14em;
+    width: 13em;
     height: 2em;
-    font-size: 0.8em;
+    font-size: 1em;
     cursor: pointer;
     font-family: Cursive;
     color: white;
@@ -145,11 +148,11 @@
     }
 
     input {
-      width: 13em;
+      width: 14em;
     }
 
     button {
-      font-size: 0.8em;
+      font-size: 1em;
     }
 
   }
@@ -175,24 +178,19 @@
       width: 50%;
       height: 50%;
       margin-left: 24%;
-      margin-top: 25px;
-      text-align: center;
-      background-color: black;
-      color: white;
-      border-radius: 25px;
-      transition: all 0.3s;
-      box-shadow: rgba(165, 16, 110, 0.4) 5px 5px, rgba(104, 7, 68, 0.3) 10px 10px, rgba(104, 8, 69, 0.2) 15px 15px, rgba(99, 5, 64, 0.1) 20px 20px, rgba(107, 6, 70, 0.05) 25px 25px;  
+      margin-top: 40px;
     }
 
     input {
-      width: 13em;
+      width: 14em;
     }
 
     button {
-      font-size: 1em;
+      font-size: 1.2em;
     }
 
     h1 {
+      font-size: 3em;
       padding-top: 30px;
     }
 
@@ -206,6 +204,7 @@
 
     input {
       width: 10em;
+      height: 2em;
     }
 
     h1 {

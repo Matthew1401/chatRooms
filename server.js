@@ -9,33 +9,39 @@ const app = express();
 const server = http.createServer(app);
 
 // Create a WebSocket server instance and attach it to the HTTP server
-const websocketServer = new WebSocket.Server({ server });
+const wss = new WebSocket.Server({ server });
 
 // Start the server listening on port 3000
 server.listen(3000, () => {
   console.log("Websocket server started on port 3000");
 });
 
-const connectedUsers = []
+const connectedUsers = {}
 
-websocketServer.on('connection', (socket) => {
+wss.on('request', (req) => {
+  console.log('someone tried to connect')
+})
+
+wss.on('connection', (socket, req) => {
   console.log('Client connected.');
 
   socket.on('message', (data) => {
     data = JSON.parse(data)
     if (data.status == 'login') {
-      connectedUsers.push([data.username, data.email])
+      if (! connectedUsers[data.email] == undefined) {
+
+      }
+      connectedUsers[data.email] = data.username;
       console.log(connectedUsers)
     }
-    console.log("message",data.toString())
 
    // Broadcast the message to all connected clients
-    websocketServer.clients.forEach(function each(client) {
-      if (client !== socket && client.readyState === WebSocket.OPEN) {
-        client.send(data.toString());
-        console.log("message",data.toString())
-      }
-    });
+    // wss.clients.forEach(function each(client) {
+    //   if (client !== socket && client.readyState === WebSocket.OPEN) {
+    //     client.send(data.toString());
+    //     console.log("message",data.toString())
+    //   }
+    // });
   });
   socket.on('close', () => {
     console.log('------------------------------------');

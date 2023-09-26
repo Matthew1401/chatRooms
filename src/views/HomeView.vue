@@ -1,37 +1,53 @@
 <template>
-  <RouterView />
+  <main>
+    <div class="decoration">
+      <p>Welcome in chat rooms application. To start enter your nickname and email.</p>
+    </div>
+    <div class="form-container">
+      <h1>Enter your data</h1>
+      <form @submit.prevent="submitForm">
+        <input type="text" v-model="data.nickname" placeholder="Enter your name"> <br>
+        <input type="email" v-model="data.email" placeholder="Enter your email"> <br>
+        <button>Submit</button>
+      </form>
+      <div class="valid-data">{{ data.validData }}</div>
+    </div>
+    <Footer />
+  </main>
 </template>
-<!-- 
-  Done TODO: 1.Na początek stworzyć formularz do podania imienia/nicku oraz maila.
-  
-  TODO: 2.Przekierować użytkownika do strony z wybieraniem pokoi. Stworzyć taką stronę, gdzie można wybierać pokój lub go stworzyć.
-  TODO: 3.Zsynchronizować to z serwerem. Stworzony pokój musi pojawiać się u innych użytkowników.
-  TODO: 4.Stworzyć unikalne id dla każdego użytkownika. Niech to będzie email. Po odłączeniu z sesji dane użytkownika są usuwane z tabeli.
- -->
 
 <script setup>
-  import { RouterView } from 'vue-router'
+  import { reactive } from 'vue'
+  import Footer from '../components/Footer.vue'
 
-  // const username = ref('')
-  // const text = ref('')
-  // const socket = new WebSocket('ws://localhost:3000')
-  // const messages = ref([])
+  const socket = new WebSocket('ws://localhost:3000')
+  
+  const data = reactive({
+    validData: '',
+    email: '',
+    nickname: ''
+  })
 
-  // const sendMessage = () => {
-  //   const messageData = { username: username.value, message: text.value};
-  //   console.log(messageData)
-  //   // Send the message data to the server using WebSockets
-  //   socket.send(JSON.stringify(messageData))
-  //   // Add the message data to the messages array
-  //   messages.value.push(messageData)
-  // }
+  const submitForm = () => {
+    if (data.nickname.length < 4) {
+      data.validData = 'Your nickname should contain more than 4 characters.'
+    }
+    else {
+      if (! /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(data.email)) {
+        data.validData = 'Please enter a valid email address.'
+      }
+      else {
+        const messageData = { status: 'login', username: data.nickname, email: data.email};
+        console.log(messageData)
+        socket.send(JSON.stringify(messageData))
+      }
+    }
+  }
 
-  // socket.onmessage = (event) => {
-  //   const message = JSON.parse(event.data);
-  //   messages.value.push(message);
-  // }
-
-
+  socket.onmessage = (event) => {
+    const message = JSON.parse(event.data);
+    console.log(message)
+  }
 </script>
 
 <style scoped>

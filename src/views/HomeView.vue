@@ -6,8 +6,8 @@
     <div class="form-container">
       <h1>Sign up</h1>
       <form @submit.prevent="submitForm">
-        <input type="text" v-model="data.nickname" placeholder="Enter your name"> <br>
-        <input type="email" v-model="data.email" placeholder="Enter your email"> <br>
+        <input type="text" v-model.trim="data.nickname" placeholder="Enter your name"> <br>
+        <input type="email" v-model.trim="data.email" placeholder="Enter your email"> <br>
         <button>Submit</button>
       </form>
       <div class="valid-data">{{ data.validData }}</div>
@@ -17,8 +17,17 @@
 </template>
 
 <script setup>
-  import { reactive, defineProps } from 'vue'
+  import { reactive, defineProps, defineEmits } from 'vue'
+  import { useRouter } from 'vue-router'
   import Footer from '../components/Footer.vue'
+
+  const emits = defineEmits('formSended')
+  const router = useRouter()
+
+  const sendEmit = (email, nickname) => {
+    emits('formSended', email, nickname)
+    router.push(`/rooms`)
+  }
 
   const {socket} = defineProps(['socket'])
 
@@ -29,8 +38,8 @@
   })
 
   const submitForm = () => {
-    if (data.nickname.length < 4) {
-      data.validData = 'Your nickname should contain more than 4 characters.'
+    if (data.nickname.length < 4 || data.nickname.length > 20) {
+      data.validData = 'Your nickname should contain from 4 to 20 characters.'
     }
     else {
       if (! /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(data.email)) {
@@ -39,16 +48,19 @@
       else {
         data.validData = ''
         const loginData = { status: 'login', username: data.nickname, email: data.email};
-        console.log(loginData)
         socket.send(JSON.stringify(loginData))
       }
     }
   }
 
-  // W tym miejsu tylko error jest możliwą wiadomością
   socket.onmessage = (event) => {
-    const message = JSON.parse(event.data);
-    data.validData = message.message;
+    if (event.status == 'error') {
+      const message = JSON.parse(event.data);
+      data.validData = message.message;
+    }
+    else {
+      sendEmit(data.email, data.nickname)
+    }
   }
 </script>
 

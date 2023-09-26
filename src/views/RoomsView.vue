@@ -5,16 +5,13 @@
                 <div class="box left">
                     <button>Create room</button>
                 </div>
-                <div class="box middle">CONNECTION STATUS: OPEN</div>
+                <div class="box middle">Welcome {{ nickname }}</div>
                 <div class="box right">
-                    <section>
-                        <p>Nazwa: pozderki iksdeeeeeeeeeee</p>
-                        <p>Email: lol123@.pl</p>
-                    </section>
-                    <button>Logout</button>
-                </div>              
+                    <form action="">
+                        <button type="submit">Logout</button>
+                    </form>
+                </div>             
             </div>
-
             <div class="rooms">
                 <div class="room">
 
@@ -26,13 +23,27 @@
 </template>
 
 <!-- 
-    TODO: 1.Zrobić menu.
+    Done TODO: 1.Zrobić menu.
     TODO: 2.Dodać przyciski oraz status połączenia. Jeśli użytkownika wywali, czy wywali serwer to niech wraca na '/'
     TODO: 3.Stworzyć komponent room. i dodawać go do panelu za każdym razem, gdy przycik create room wciśnięty.
  -->
 
 <script setup>
     import Footer from '../components/Footer.vue'
+    import { defineEmits, defineProps, onMounted } from 'vue'
+    import { useRouter } from 'vue-router'
+
+    const router = useRouter()
+    const emits = defineEmits('logout')
+
+    const { socket, email, nickname } = defineProps(['socket', 'email', 'nickname'])
+
+    onMounted(() => {
+        if (email == '' || nickname == '') {
+            router.push(`/`)
+        }
+    })
+ 
 </script>
 
 <style scoped>
@@ -62,25 +73,50 @@
         justify-content: center;
         align-items: center;
         border-radius: 5px;
-        transition: box-shadow 0.5s;
+        transition: box-shadow 0.4s;
         box-shadow: 
             inset 0 0 1em 5px rgba(165, 16, 110, 0.4),
-            inset 0 0 1em 10px rgba(104, 7, 68, 0.3),
-            0 0 0 0 rgba(165, 16, 110, 0.4), 
-            0 0 0 0 rgba(104, 7, 68, 0.3);
+            0 0 0 0 rgba(165, 16, 110, 0.4);
     }
 
     .menu:hover {
         box-shadow: 
             inset 0 0 0 0 rgba(165, 16, 110, 0.4),
-            inset 0 0 0 0 rgba(104, 7, 68, 0.3),
-            0 0 1em 10px rgba(165, 16, 110, 0.4), 
-            0 0 1em 20px rgba(104, 7, 68, 0.3);
+            0 0 1em 10px rgba(165, 16, 110, 0.4);
     }
 
     .box {
         width: 33%;
         height: 80%;
+    }
+
+    .menu button {
+        font-size: 1.5em;
+        width: 8em;
+        margin-top: 7px;
+        height: 1.7em;
+        background-color: rgb(10, 0, 7);
+        color: white;
+        font-family: Cursive;
+        border: 2px solid rgba(105, 6, 69, 0.253);
+        border-radius: 10px;
+        cursor: pointer;
+        transition: transform ease 0.3s, box-shadow ease 0.5s;
+    }
+
+    .menu button:hover {
+       transform: translateY(-3px);
+    }
+
+    .left button {
+        margin-left: 20px;
+    }
+
+    .left p {
+        position: absolute;
+        top: 0;
+        left: 30em;
+        font-size: 0.8em;
     }
 
     .left {
@@ -89,12 +125,29 @@
 
     .middle {
         text-align: center;
+        height: 50%;
+        font-size: 1.5em;
+        text-shadow:
+            0 0 5px rgba(255, 255, 255, .7),
+            0 0 10px rgba(255, 255, 255, .7),
+            0 0 15px rgba(255, 255, 255, .7);
     }
 
     .right {
         text-align: right;
         display: flex;
         justify-content: right;
+    }
+
+    .right p {
+        position: absolute;
+        top: 0;
+        right: 30em;
+        font-size: 0.8em;
+    }
+
+    .right button {
+        margin-right: 20px;
     }
 
     .rooms {

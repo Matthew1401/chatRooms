@@ -1,5 +1,12 @@
 <template>
-  <RouterView :socket="socket"/>
+
+  <RouterView 
+    :socket="socket" 
+    :email="data.email"
+    :nickname="data.nickname"
+    @formSended="formSended"
+  />
+
 </template>
 <!-- 
   Done TODO: 1.Na początek stworzyć formularz do podania imienia/nicku oraz maila.
@@ -11,27 +18,19 @@
 
 <script setup>
   import { RouterView } from 'vue-router'
+  import { reactive } from 'vue'
 
   const socket = new WebSocket('ws://localhost:3000')
 
-  // const username = ref('')
-  // const text = ref('')
-  // const socket = new WebSocket('ws://localhost:3000')
-  // const messages = ref([])
+  const data = reactive({
+    email: '',
+    nickname: ''
+  })
 
-  // const sendMessage = () => {
-  //   const messageData = { username: username.value, message: text.value};
-  //   console.log(messageData)
-  //   // Send the message data to the server using WebSockets
-  //   socket.send(JSON.stringify(messageData))
-  //   // Add the message data to the messages array
-  //   messages.value.push(messageData)
-  // }
-
-  // socket.onmessage = (event) => {
-  //   const message = JSON.parse(event.data);
-  //   messages.value.push(message);
-  // }
+  const formSended = (email, nickname) => {
+    data.email = email
+    data.nickname = nickname
+  }
 
 
 </script>

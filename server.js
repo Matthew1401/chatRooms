@@ -51,11 +51,14 @@ wss.on('connection', (socket) => {
       rooms.push(data);
 
       wss.clients.forEach((client) => {
-        if (client.readyState === WebSocket.OPEN) {
+        if (client !== socket && client.readyState === WebSocket.OPEN) {
           // Wyślij wiadomość do wszystkich klientów, z wyjątkiem nadawcy
           client.send(JSON.stringify(data));
         }
       });
+    }
+    else if (data.status === 'give-rooms') {
+      socket.send(JSON.stringify(rooms));
     }
     else if (data.status === 'message') {
       // Sprawdź, czy odbiorca istnieje w connectedUsers

@@ -2,19 +2,13 @@
 
   <RouterView 
     :socket="socket" 
-    :email="data.email"
-    :nickname="data.nickname"
-    @formSended="onFormSended"
+    :user="data.user"
+    :room="data.room"
+    @form-sended="onFormSended"
+    @enter-to-room="onEnterToRoom"
   />
 
 </template>
-<!-- 
-  Done TODO: 1.Na początek stworzyć formularz do podania imienia/nicku oraz maila.
-  Done TODO: 4.Stworzyć unikalne id dla każdego użytkownika. Niech to będzie email. Po odłączeniu z sesji dane użytkownika są usuwane z tabeli.
-
-  TODO: 2.Przekierować użytkownika do strony z wybieraniem pokoi. Stworzyć taką stronę, gdzie można wybierać pokój lub go stworzyć.
-  TODO: 3.Zsynchronizować to z serwerem. Stworzony pokój musi pojawiać się u innych użytkowników.
- -->
 
 <script setup>
   import { RouterView } from 'vue-router'
@@ -23,18 +17,26 @@
   const socket = new WebSocket('ws://localhost:3000')
 
   const data = reactive({
-    email: '',
-    nickname: '',
+    user: {
+      email: '',
+      nickname: ''
+    },
+    recipient: {},
+    room: null
   })
 
-  const onFormSended = (email, nickname) => {
-    data.email = email
-    data.nickname = nickname
+  const onFormSended = (user) => {
+    data.user.email = user.email
+    data.user.nickname = user.nickname
+  }
+
+  const onEnterToRoom = (room) => {
+    data.room = room
   }
 
   socket.onclose = () => {
-    data.email = ''
-    data.nickname = ''
+    data.user.email = ''
+    data.user.nickname = ''
   }
 
 

@@ -1,5 +1,5 @@
 <template>
-    <div class="room">
+    <div class="room" @click="enterToRoom">
         {{ room.id }}
         <div class="name">
             {{ room.name }}
@@ -8,7 +8,14 @@
 </template>
 
 <script setup>
+
     const { room } = defineProps(['room'])
+    const emits = defineEmits(['enterToRoom'])
+
+    const enterToRoom = () => {
+        emits('enterToRoom', room)
+    }
+
 </script>
 
 <style scoped>

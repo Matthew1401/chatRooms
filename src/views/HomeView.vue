@@ -6,8 +6,8 @@
     <div class="form-container">
       <h1>Sign up</h1>
       <form @submit.prevent="submitForm" name="form">
-        <input type="text" v-model.trim="data.nickname" placeholder="Enter your name"> <br>
-        <input type="email" v-model.trim="data.email" placeholder="Enter your email"> <br>
+        <input type="text" v-model.trim="data.user.nickname" placeholder="Enter your name"> <br>
+        <input type="email" v-model.trim="data.user.email" placeholder="Enter your email"> <br>
         <button>Submit</button>
       </form>
       <div class="valid-data">{{ data.validData }}</div>
@@ -21,33 +21,35 @@
   import { useRouter } from 'vue-router'
   import Footer from '../components/Footer.vue'
 
-  const emits = defineEmits('formSended')
+  const emits = defineEmits('form-sended')
   const router = useRouter()
 
   const {socket} = defineProps(['socket'])
 
   const data = reactive({
     validData: '',
-    email: '',
-    nickname: ''
+    user : {
+      email: '',
+      nickname: ''
+    },
   })
 
-  const emitFormSended = (email, nickname) => {
+  const emitFormSended = (user) => {
     data.validData = ''
-    emits('formSended', email, nickname)
+    emits('form-sended', user)
     router.push(`/rooms`)
   }
 
   const submitForm = () => {
-    if (data.nickname.length < 4 || data.nickname.length > 20) {
+    if (data.user.nickname.length < 4 || data.user.nickname.length > 20) {
       data.validData = 'Your nickname should contain from 4 to 20 characters.'
     }
     else {
-      if (! /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(data.email)) {
+      if (! /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(data.user.email)) {
         data.validData = 'Please enter a valid email address.'
       }
       else {  
-        const loginData = { status: 'login', username: data.nickname, email: data.email};
+        const loginData = { status: 'login', username: data.user.nickname, email: data.user.email};
         socket.send(JSON.stringify(loginData))
         data.validData = 'Error: connection with server failed.'
       }
@@ -60,7 +62,7 @@
       data.validData = message.message;
     }
     else {
-      emitFormSended(data.email, data.nickname)
+      emitFormSended(data.user)
     }
   }
 </script>

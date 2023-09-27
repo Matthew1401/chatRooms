@@ -16,8 +16,9 @@
             <div class="menu">
                 <div class="box left">
                     <button @click="data.isRoomCreating=true">Create room</button>
+                    <button @click="refresh">Refresh</button>
                 </div>
-                <div class="box middle">Welcome {{ nickname }}</div>
+                <div class="box middle">Welcome {{ user.nickname }}</div>
                 <div class="box right">
                     <form action="">
                         <button type="submit">Logout</button>
@@ -29,19 +30,13 @@
                     v-for="room in data.rooms"
                     :key="room.id"
                     :room="room"
+                    @enter-to-room="onEnterToRoom"
                 />
             </div>
         </div>
         <Footer />
     </main>
 </template>
-
-<!-- 
-    Done TODO: 1.Zrobić menu.
-    Done TODO: 2.Dodać przyciski oraz status połączenia. Jeśli użytkownika wywali, czy wywali serwer to niech wraca na '/'
-    
-    TODO: 3.Stworzyć komponent room. i dodawać go do panelu za każdym razem, gdy przycik create room wciśnięty.
- -->
 
 <script setup>
     import Footer from '../components/Footer.vue'
@@ -60,10 +55,11 @@
         rooms: []
     })
 
-    const { socket, email, nickname } = defineProps(['socket', 'email', 'nickname'])
+    const { socket, user } = defineProps(['socket', 'user'])
+    const emits = defineEmits(['enter-to-room'])
 
     onMounted(() => {
-        if (email == '' || nickname == '') {
+        if (user.email == '' || user.nickname == '') {
             router.push(`/`)
         }
     })
@@ -80,17 +76,30 @@
         }
         else {
             data.validData = ''
-            let room = {status: 'room', id: data.roomId, email: email, name: data.roomName, password: data.roomPassword}
+            let room = {status: 'room', id: data.roomId, user: user, name: data.roomName, password: data.roomPassword}
             data.roomName = ''
             data.roomPassword = ''
             data.isRoomCreating = false
             socket.send(JSON.stringify(room))
+            data.roomId++
+            onEnterToRoom(room)
         }
+    }
+
+    const onEnterToRoom = (room) => {
+        emits('enter-to-room', room)
+        router.push(`/room/${room.id}`)
+    }
+
+    const refresh = () => {
+        data.rooms = []
+        data.roomId = 1
+        let ask = {status: 'give-rooms'}
+        socket.send(JSON.stringify(ask))
     }
 
     socket.onmessage = (event) => {
         const message = JSON.parse(event.data)
-        console.log(message)
         if (message.status === 'room') {
             data.rooms.push(message)
             data.roomId++
@@ -99,7 +108,6 @@
             for (var i = 0; i<message.length; i++) {
                 data.rooms.push(message[i])
                 data.roomId++
-                console.log(message[i])
             }
         }
     }

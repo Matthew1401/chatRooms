@@ -90,9 +90,17 @@
 
     socket.onmessage = (event) => {
         const message = JSON.parse(event.data)
+        console.log(message)
         if (message.status === 'room') {
             data.rooms.push(message)
             data.roomId++
+        }
+        else if (message[0].status === 'room'){
+            for (var i = 0; i<message.length; i++) {
+                data.rooms.push(message[i])
+                data.roomId++
+                console.log(message[i])
+            }
         }
     }
  
@@ -100,13 +108,7 @@
 
 <style scoped>
     main {
-        width: 100vw;
-        height: 100vh;
         font-size: 20px;
-        justify-content: center;
-        align-items: center;
-        display: flex;
-        font-family: Cursive;
     }
 
     .create-room {
@@ -122,8 +124,8 @@
     .room-settings {
         background-color: black;
         border-radius: 15px;
-        width: 20%;
-        height: 50%;
+        width: 400px;
+        height: 450px;
         text-align: center;
         transition: all 0.5s;
         position: relative;
@@ -278,7 +280,7 @@
             0 0 0 0 rgba(104, 7, 68, 0.3);
         display: flex;
         flex-wrap: wrap;
-        overflow-y: scroll;
+        overflow-y: auto;
     }
 
     ::-webkit-scrollbar {

@@ -24,7 +24,7 @@
 
   const data = reactive({
     email: '',
-    nickname: ''
+    nickname: '',
   })
 
   const onFormSended = (email, nickname) => {

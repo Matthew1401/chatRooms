@@ -6,8 +6,14 @@ const app = express();
 const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
 const connectedUsers = {};
+const rooms = []
 
-wss.on('connection', (socket, req) => {
+// function delay(time) {
+//   return new Promise(resolve => setTimeout(resolve, time));
+// }
+
+
+wss.on('connection', (socket) => {
   console.log('Client connected.');
 
   socket.on('message', (data) => {
@@ -20,7 +26,7 @@ wss.on('connection', (socket, req) => {
         socket.send(JSON.stringify({
           status: 'error',
           message: 'This email adress is curentlly in use.'
-        }));
+        }));     
         return;
       }
 
@@ -35,8 +41,15 @@ wss.on('connection', (socket, req) => {
           status: 'login',
           message: 'Succesfully'
         }));
+
+      // delay(1000).then(() => );
+      if (rooms.length) {
+        socket.send(JSON.stringify(rooms))
+      }    
     } 
     else if (data.status === 'room') {
+      rooms.push(data);
+
       wss.clients.forEach((client) => {
         if (client.readyState === WebSocket.OPEN) {
           // Wyślij wiadomość do wszystkich klientów, z wyjątkiem nadawcy

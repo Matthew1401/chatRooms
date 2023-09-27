@@ -5,3 +5,14 @@ body {
     background-image: url('bg1.png');
     background-size: cover;
 }
+
+main {
+    width: 100vw;
+    height: 100vh;
+    color: #FFFF;
+    font-size: 25px;
+    justify-content: center;
+    align-items: center;
+    display: flex;
+    font-family: Cursive;
+}

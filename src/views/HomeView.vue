@@ -66,14 +66,6 @@
 </script>
 
 <style scoped>
-  main {
-    width: 100vw;
-    height: 100vh;
-    font-size: 25px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
 
   .decoration {
     width: 40%;

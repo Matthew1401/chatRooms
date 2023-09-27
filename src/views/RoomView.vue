@@ -47,6 +47,10 @@
     })
 
     const exitRoom = () => {
+        if (user.nickname == room.user.nickname) {
+            let ask = {status: 'delete-room', id: room.id}
+            socket.send(JSON.stringify(ask))
+        }
         let ask = {status: 'give-rooms'}
         socket.send(JSON.stringify(ask))
         router.push(`/rooms`)

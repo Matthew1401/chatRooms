@@ -8,10 +8,6 @@ const wss = new WebSocket.Server({ server });
 const connectedUsers = {};
 const rooms = []
 
-// function delay(time) {
-//   return new Promise(resolve => setTimeout(resolve, time));
-// }
-
 
 wss.on('connection', (socket) => {
   console.log('Client connected.');
@@ -42,7 +38,6 @@ wss.on('connection', (socket) => {
           message: 'Succesfully'
         }));
 
-      // delay(1000).then(() => );
       if (rooms.length) {
         socket.send(JSON.stringify(rooms))
       }    
@@ -59,6 +54,20 @@ wss.on('connection', (socket) => {
     }
     else if (data.status === 'give-rooms') {
       socket.send(JSON.stringify(rooms));
+    }
+    else if (data.status === 'delete-room') {
+      for (var i = 0; i<rooms.length; i++) {
+        if ( rooms[i].id == data.id) {
+          rooms.splice(i, 1)
+          break;
+        }
+      }
+      wss.clients.forEach((client) => {
+        if (client.readyState === WebSocket.OPEN) {
+          // Wyślij wiadomość do wszystkich klientów, z wyjątkiem nadawcy
+          client.send(JSON.stringify(rooms));
+        }
+      });
     }
     else if (data.status === 'message') {
       // Sprawdź, czy odbiorca istnieje w connectedUsers

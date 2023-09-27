@@ -75,8 +75,7 @@
             data.validData = 'Your room name should contain from 4 to 15 characters.'
         }
         else {
-            data.validData = ''
-            let room = {status: 'room', id: data.roomId, user: user, name: data.roomName, password: data.roomPassword}
+            var room = {status: 'room', id: data.roomId, user: user, name: data.roomName, password: data.roomPassword}       
             data.roomName = ''
             data.roomPassword = ''
             data.isRoomCreating = false
@@ -105,6 +104,7 @@
             data.roomId++
         }
         else if (message[0].status === 'room'){
+            data.rooms = []
             for (var i = 0; i<message.length; i++) {
                 data.rooms.push(message[i])
                 data.roomId++

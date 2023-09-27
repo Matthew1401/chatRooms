@@ -1,0 +1,43 @@
+<template>
+    <div class="room">
+        {{ room.id }}
+        <div class="name">
+            {{ room.name }}
+        </div>
+    </div>
+</template>
+
+<script setup>
+    const { room } = defineProps(['room'])
+</script>
+
+<style scoped>
+    .room {
+        margin-top: 40px;
+        margin-left: 40px;
+        background-color: #5e064f;
+        width: 250px;
+        height: 250px;
+        border-radius: 15px;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 7em;
+        cursor: pointer;
+    }
+
+    .room:hover {
+        transform: translateY(-3px);
+    }
+
+    .name {
+        position: absolute;
+        font-size: 0.15em;
+        color: #FFFFFF;
+        bottom: 5px;
+        text-shadow:
+            0 0 5px rgba(255, 255, 255, .7),
+            0 0 15px rgba(255, 255, 255, .7);
+    }
+</style>

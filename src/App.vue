@@ -4,7 +4,7 @@
     :socket="socket" 
     :email="data.email"
     :nickname="data.nickname"
-    @formSended="formSended"
+    @formSended="onFormSended"
   />
 
 </template>
@@ -27,9 +27,14 @@
     nickname: ''
   })
 
-  const formSended = (email, nickname) => {
+  const onFormSended = (email, nickname) => {
     data.email = email
     data.nickname = nickname
+  }
+
+  socket.onclose = () => {
+    data.email = ''
+    data.nickname = ''
   }
 
 

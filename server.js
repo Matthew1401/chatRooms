@@ -36,6 +36,14 @@ wss.on('connection', (socket, req) => {
           message: 'Succesfully'
         }));
     } 
+    else if (data.status === 'room') {
+      wss.clients.forEach((client) => {
+        if (client.readyState === WebSocket.OPEN) {
+          // Wyślij wiadomość do wszystkich klientów, z wyjątkiem nadawcy
+          client.send(JSON.stringify(data));
+        }
+      });
+    }
     else if (data.status === 'message') {
       // Sprawdź, czy odbiorca istnieje w connectedUsers
       const recipientSocket = connectedUsers[data.recipientEmail]?.socket;

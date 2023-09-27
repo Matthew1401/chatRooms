@@ -5,7 +5,7 @@
     </div>
     <div class="form-container">
       <h1>Sign up</h1>
-      <form @submit.prevent="submitForm">
+      <form @submit.prevent="submitForm" name="form">
         <input type="text" v-model.trim="data.nickname" placeholder="Enter your name"> <br>
         <input type="email" v-model.trim="data.email" placeholder="Enter your email"> <br>
         <button>Submit</button>
@@ -17,17 +17,12 @@
 </template>
 
 <script setup>
-  import { reactive, defineProps, defineEmits } from 'vue'
+  import { reactive } from 'vue'
   import { useRouter } from 'vue-router'
   import Footer from '../components/Footer.vue'
 
   const emits = defineEmits('formSended')
   const router = useRouter()
-
-  const sendEmit = (email, nickname) => {
-    emits('formSended', email, nickname)
-    router.push(`/rooms`)
-  }
 
   const {socket} = defineProps(['socket'])
 
@@ -37,6 +32,12 @@
     nickname: ''
   })
 
+  const emitFormSended = (email, nickname) => {
+    data.validData = ''
+    emits('formSended', email, nickname)
+    router.push(`/rooms`)
+  }
+
   const submitForm = () => {
     if (data.nickname.length < 4 || data.nickname.length > 20) {
       data.validData = 'Your nickname should contain from 4 to 20 characters.'
@@ -45,21 +46,21 @@
       if (! /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(data.email)) {
         data.validData = 'Please enter a valid email address.'
       }
-      else {
-        data.validData = ''
+      else {  
         const loginData = { status: 'login', username: data.nickname, email: data.email};
         socket.send(JSON.stringify(loginData))
+        data.validData = 'Error: connection with server failed.'
       }
     }
   }
 
   socket.onmessage = (event) => {
-    if (event.status == 'error') {
-      const message = JSON.parse(event.data);
+    const message = JSON.parse(event.data);
+    if (message.status === 'error') {
       data.validData = message.message;
     }
     else {
-      sendEmit(data.email, data.nickname)
+      emitFormSended(data.email, data.nickname)
     }
   }
 </script>

@@ -14,12 +14,14 @@
         </div>
         <div class="container" v-else>
             <div class="menu">
-                <div class="box left">
+                <div class="middle">Welcome {{ user.nickname }}</div>
+                <div class="left1">
                     <button @click="data.isRoomCreating=true">Create room</button>
+                </div>
+                <div class="left2">
                     <button @click="refresh">Refresh</button>
                 </div>
-                <div class="box middle">Welcome {{ user.nickname }}</div>
-                <div class="box right">
+                <div class="right">
                     <form action="">
                         <button type="submit">Logout</button>
                     </form>
@@ -213,11 +215,8 @@
         color: white;
         margin-top: 15px;
         width: 100%;
-        min-height: 4em;
-        height: auto;
-        display: flex;
-        justify-content: center;
-        align-items: center;
+        height: 4em;
+        position: relative;
         border-radius: 5px;
         transition: box-shadow 0.4s;
         box-shadow: 
@@ -229,11 +228,6 @@
         box-shadow: 
             inset 0 0 0 0 rgba(165, 16, 110, 0.4),
             0 0 1em 10px rgba(165, 16, 110, 0.4);
-    }
-
-    .box {
-        width: 500px;
-        height: 80%;
     }
 
     .menu button {
@@ -255,25 +249,24 @@
        transform: translateY(-3px);
     }
 
-    .left button {
-        margin-left: 20px;
-    }
-
-    .left p {
+    .left1 {
         position: absolute;
-        top: 0;
-        left: 30em;
-        font-size: 0.8em;
+        top: 8px;
+        left: 20px;
     }
 
-    .left {
-        text-align: left;
+    .left2 {
+        position: absolute;
+        top: 8px;
+        left: 255px;
     }
 
     .middle {
         text-align: center;
-        height: 50%;
+        position: absolute;
         font-size: 1.5em;
+        top: 15px;
+        width: 100%;
         text-shadow:
             0 0 5px rgba(255, 255, 255, .7),
             0 0 10px rgba(255, 255, 255, .7),
@@ -281,20 +274,9 @@
     }
 
     .right {
-        text-align: right;
-        display: flex;
-        justify-content: right;
-    }
-
-    .right p {
         position: absolute;
-        top: 0;
-        right: 30em;
-        font-size: 0.8em;
-    }
-
-    .right button {
-        margin-right: 20px;
+        right: 20px;
+        top: 8px;
     }
 
     .rooms {
@@ -303,14 +285,15 @@
         width: 100%;
         height: 80%;
         border-radius: 10px;
+        padding-top: 40px;
         transition: box-shadow ease 0.5s;
-        /* box-shadow: rgba(165, 16, 110, 0.4) 0px 5px 5px 0px, rgba(104, 7, 68, 0.3) 0px 10px 10px 0px, rgba(104, 8, 69, 0.2) 0px 15px 15px 0px, rgba(99, 5, 64, 0.1) 0px 20px 20px 0px, rgba(107, 6, 70, 0.05) 0px 25px 25px 0px;   */
         box-shadow: 
             inset 0 0 1em 10px rgba(165, 16, 110, 0.4),
             inset 0 0 1em 20px rgba(104, 7, 68, 0.3),
             0 0 0 0 rgba(165, 16, 110, 0.4), 
             0 0 0 0 rgba(104, 7, 68, 0.3);
         display: flex;
+        justify-content: center;
         flex-wrap: wrap;
         overflow-y: auto;
     }
@@ -341,15 +324,56 @@
         0 0 1em 20px rgba(104, 7, 68, 0.3);
     }
 
-    @media only screen and (max-width: 800px) {
-        .menu {
-            display: block;
-        }
-
-        .left, .right, .middle {
-            display: hidden;
+    @media only screen and (max-width: 1550px) {
+        .middle {
+            width: auto;
+            left: 485px;
         }
     }
 
+    @media only screen and (max-width: 1200px) {
+        .middle {
+            display: none;
+        }
+    }
+
+    @media only screen and (max-width: 900px) {
+        .menu {
+            height: 10em;
+            display: flex;
+        }
+
+        .left1 {
+            left: unset;
+            width: 100%;
+            text-align: center;          
+        }
+
+        .left2 {
+            left: unset;
+            width: 100%;
+            text-align: center;
+            top: 65px;
+        }
+
+        .right {
+            right: unset;
+            width: 100%;
+            text-align: center;   
+            top: 122px;  
+        }
+    }
+
+    @media only screen and (max-width: 500px) {
+        .menu {
+            background-color: unset;
+            border: unset;
+            box-shadow: unset;
+        }
+
+        .menu:hover {
+            box-shadow: unset;
+        }
+    }
     
 </style>

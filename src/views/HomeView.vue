@@ -41,8 +41,8 @@
   }
 
   const submitForm = () => {
-    if (data.user.nickname.length < 4 || data.user.nickname.length > 20) {
-      data.validData = 'Your nickname should contain from 4 to 20 characters.'
+    if (data.user.nickname.length < 4 || data.user.nickname.length > 14) {
+      data.validData = 'Your nickname should contain from 4 to 14 characters.'
     }
     else {
       if (! /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(data.user.email)) {
@@ -99,7 +99,7 @@
 
   .form-container {
     width: 30%;
-    height: 60%;
+    height: 500px;
     margin-left: 100px;
     text-align: center;
     background-color: black;
@@ -148,6 +148,7 @@
     font-family: Cursive;
     font-weight: 200;
     font-size: 0.6em;
+    padding: 0 20px;
   }
 
   @media only screen and (max-width: 1200px) {
@@ -160,7 +161,11 @@
     }
 
     button {
-      font-size: 1em;
+      font-size: 1.2em;
+    }
+
+    .valid-data {
+      font-size: 0.8em;
     }
 
   }
@@ -184,7 +189,7 @@
 
     .form-container {
       width: 50%;
-      height: 50%;
+      height: 450px;
       margin-left: 24%;
       margin-top: 40px;
     }
@@ -194,12 +199,16 @@
     }
 
     button {
-      font-size: 1.2em;
+      font-size: 1.5em;
     }
 
     h1 {
       font-size: 3em;
       padding-top: 30px;
+    }
+
+    .valid-data {
+      font-size: 1em;
     }
 
   }
@@ -217,6 +226,7 @@
 
     h1 {
       margin-top: 45px;
+      font-size: 4em;
     }
   }
   

@@ -14,4 +14,11 @@
         font-family: Cursive;
         font-size: 0.6em;
     }
+
+    @media only screen and (max-width: 800px) {
+        .footer {
+            display: none;
+        }
+
+    }
 </style>

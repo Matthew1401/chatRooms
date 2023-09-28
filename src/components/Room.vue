@@ -20,8 +20,8 @@
 
 <style scoped>
     .room {
-        margin-top: 40px;
         margin-left: 40px;
+        margin-right: 40px;
         background-color: #5e064f;
         width: 250px;
         height: 250px;
@@ -47,4 +47,16 @@
             0 0 5px rgba(255, 255, 255, .7),
             0 0 15px rgba(255, 255, 255, .7);
     }
+
+    @media only screen and (max-width: 1200px) {
+        .room {
+            width: 200px;
+            height: 200px;
+            margin-left: 20px;
+            margin-right: 20px;
+            margin-top: 0;
+            margin-bottom: 0;
+        }
+    }
+
 </style>

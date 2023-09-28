@@ -47,7 +47,7 @@
     })
 
     const exitRoom = () => {
-        if (user.nickname == room.user.nickname) {
+        if (user.email == room.user.email) {
             let ask = {status: 'delete-room', id: room.id}
             socket.send(JSON.stringify(ask))
         }

@@ -75,6 +75,23 @@
             data.validData = 'Your room name should contain from 4 to 15 characters.'
         }
         else {
+
+            if (data.rooms.length > 0) {
+                data.roomId = 1
+                var roomsIds = []
+                for (var i=0; i<data.rooms.length; i++) {
+                    console.log(data.rooms[i])
+                    roomsIds.push(data.rooms[i].id)
+                }
+                console.log(roomsIds)
+                console.log('An array creater')
+
+                while (roomsIds.includes(data.roomId)) {
+                    data.roomId++
+                    console.log('Inside while loop')
+                }
+            }
+
             var room = {status: 'room', id: data.roomId, user: user, name: data.roomName, password: data.roomPassword}       
             data.roomName = ''
             data.roomPassword = ''
@@ -103,8 +120,9 @@
             data.rooms.push(message)
             data.roomId++
         }
-        else if (message[0].status === 'room'){
+        else {
             data.rooms = []
+            data.roomId = 1
             for (var i = 0; i<message.length; i++) {
                 data.rooms.push(message[i])
                 data.roomId++

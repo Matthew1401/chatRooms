@@ -64,7 +64,7 @@ wss.on('connection', (socket) => {
       }
       wss.clients.forEach((client) => {
         if (client.readyState === WebSocket.OPEN) {
-          // Wyślij wiadomość do wszystkich klientów, z wyjątkiem nadawcy
+          // Wyślij wiadomość do wszystkich klientów
           client.send(JSON.stringify(rooms));
         }
       });
@@ -93,6 +93,20 @@ wss.on('connection', (socket) => {
       if (connectedUsers[email].socket === socket) {
         console.log(`${connectedUsers[email].username} disconnected.`);
         delete connectedUsers[email];
+        // Usuwanie pokoju po odłączeniu użytkownika z serwera
+        for (var i = 0; i<rooms.length; i++) {    
+          if ( rooms[i].user.email == email) {  
+            rooms.splice(i, 1)
+            // Wysyłanie pokoju do każdego z użytkowników
+            wss.clients.forEach((client) => {
+              if (client.readyState === WebSocket.OPEN) {
+                // Wyślij wiadomość do wszystkich klientów
+                client.send(JSON.stringify(rooms));
+              }
+            });
+            break;
+          }
+        }
         break;
       }
     }

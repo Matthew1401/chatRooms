@@ -10,30 +10,27 @@
         <div class="menu">
             <section>
                 <h1>Room data</h1>
-                <p>Room nr {{ room.id }}</p>
+                <p>Room nr: {{ room.id }}</p>
                 <p>Room name: {{ room.name }}</p>
-                <p>Room password: {{ room.password }}</p>
                 <p>Room creator: {{ room.user.nickname }}</p>
+                <br>
+                <h2>Connected user:</h2>
+                <p>{{ recipientData.nickname }}</p>
             </section>
             <button class="exit" @click="exitRoom">Exit room</button>
         </div>
         <div class="messenger">
             <div class="message-container">
-                <div class="sended-text">
-                    <div class="message-box">ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss</div>
-                </div>
-                <div class="received-text">
-                    <p>Mateuszek56:</p>
-                    <div class="message-box">sssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss</div>
-                </div>
-                <div class="received-text">
-                    <p>Mateuszek56:</p>
-                    <div class="message-box">Dane kolegi: {{ recipientData.nickname }}, {{ recipientData.email }}</div>
-                </div>
+                <Messages 
+                    v-for="message in data.messageHistory"
+                    :key="message.id"
+                    :message="message"
+                    :nickname="recipientData.nickname"
+                />
             </div>
             <div class="writing-space">
-                <form @submit.prevent="console.log(recipientData)">
-                    <input type="text">
+                <form @submit.prevent="sendMessage">
+                    <input type="text" v-model.trim="data.message">
                     <button type="submit">Send</button>
                 </form>
             </div>
@@ -44,6 +41,7 @@
 <script setup>
     import { onMounted, reactive, onBeforeMount } from 'vue';
     import { useRouter } from 'vue-router'
+    import Messages from '../components/Messages.vue'
 
     const router = useRouter()
 
@@ -51,6 +49,12 @@
     const recipientData = reactive({
         nickname: '',
         email: ''
+    })
+
+    const data = reactive({
+        message: '',
+        messageId: 1,
+        messageHistory: []
     })
 
     onBeforeMount(() => {
@@ -65,6 +69,16 @@
             router.push(`/`)
         }
     })
+
+    const sendMessage = () => {
+        if (recipientData.email.length > 0) {
+            let ask = {status: 'message', message: data.message, recipientEmail: recipientData.email}
+            socket.send(JSON.stringify(ask))
+        }
+        data.messageHistory.push({sended: true, id: data.messageId, message: data.message })
+        data.messageId++
+        data.message = ''
+    }
 
     const exitRoom = () => {
         if (user.email == room.user.email) {
@@ -82,6 +96,10 @@
         if (message.status == 'user') {
             recipientData.nickname = message.nickname
             recipientData.email = message.email
+        }
+        else if (message.status == 'message') {
+            data.messageHistory.push({sended: false, id: data.messageId, message: message.message })
+            data.messageId++
         }
     }
 
@@ -137,11 +155,22 @@
         font-family: Cursive;
         font-weight: 600;
         font-size: 1.5em;
+        margin: 0;
         text-shadow:
             0 0 10px rgba(255, 255, 255, .7),
             0 0 20px rgba(255, 255, 255, .7);
     }
 
+    .menu h2 {
+        color: #FFFFFF;
+        font-family: Cursive;
+        font-weight: 500;
+        font-size: 1em;
+        margin: 0;
+        text-shadow:
+            0 0 10px rgba(255, 255, 255, .7),
+            0 0 20px rgba(255, 255, 255, .7);
+    }
 
     .menu .exit {
         position: absolute;
@@ -181,38 +210,6 @@
         width: 95%;
         display: block;
         overflow-y: auto;
-    }
-
-    .sended-text {
-        width: 100%;
-        display: flex;
-        justify-content: right;
-        height: auto;
-    }
-
-    .received-text {
-        width: 100%;
-        display: flex;
-        height: auto;
-        position: relative;
-    }
-
-    .received-text p {
-        position: absolute;
-        top: -25px;
-        left: 10px;
-    }
-
-    .message-box {
-        background-color: rgba(46, 45, 45, 0.288);
-        border: 1px solid purple;
-        border-radius: 10px;
-        padding: 2px 5px;
-        margin: 15px 10px;
-        max-width: 70%;
-        overflow: auto;
-        height: auto;
-        word-wrap: break-word;
     }
 
     .writing-space {

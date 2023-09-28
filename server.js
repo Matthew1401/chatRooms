@@ -86,7 +86,6 @@ wss.on('connection', (socket) => {
         // Jeśli odbiorca istnieje, przekaż mu wiadomość
         recipientSocket.send(JSON.stringify({
           status: 'message',
-          sender: data.senderUsername,
           message: data.message,
         }));
         console.log(`Message sent from ${data.senderUsername} to ${data.recipientEmail}: ${data.message}`);

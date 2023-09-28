@@ -213,7 +213,8 @@
         color: white;
         margin-top: 15px;
         width: 100%;
-        height: 4em;
+        min-height: 4em;
+        height: auto;
         display: flex;
         justify-content: center;
         align-items: center;
@@ -231,14 +232,15 @@
     }
 
     .box {
-        width: 33%;
+        width: 500px;
         height: 80%;
     }
 
     .menu button {
-        font-size: 1.5em;
+        font-size: 1.4em;
         width: 8em;
         margin-top: 7px;
+        margin-bottom: 7px;
         height: 1.7em;
         background-color: rgb(10, 0, 7);
         color: white;
@@ -337,6 +339,16 @@
         inset 0 0 0 0 rgba(104, 7, 68, 0.3),
         0 0 1em 10px rgba(165, 16, 110, 0.4), 
         0 0 1em 20px rgba(104, 7, 68, 0.3);
+    }
+
+    @media only screen and (max-width: 800px) {
+        .menu {
+            display: block;
+        }
+
+        .left, .right, .middle {
+            display: hidden;
+        }
     }
 
     

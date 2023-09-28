@@ -18,4 +18,16 @@
         height: auto;
         word-wrap: break-word;
     }
+
+    @media only screen and (max-width: 1400px) {
+        .message-box {
+            font-size: 20px;
+        }
+    }
+
+    @media only screen and (max-width: 1000px) {
+        .message-box {
+            font-size: 15px;
+        }
+    }
 </style>

@@ -141,6 +141,7 @@
 <style scoped>
     main {
         font-size: 20px;
+        overflow: hidden;
     }
 
     .create-room {

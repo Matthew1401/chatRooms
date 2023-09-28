@@ -1,7 +1,6 @@
 <template>
     <main>
         <div class="data">
-            <div class="move" style="width: 320px; height: 125px;"></div>
             <section>
                 <p>nick: {{ user.nickname }}</p>
                 <p>email: {{ user.email }}</p>
@@ -71,6 +70,9 @@
     })
 
     const sendMessage = () => {
+        if (data.message == '') {
+            return
+        }
         if (recipientData.email.length > 0) {
             let ask = {status: 'message', message: data.message, recipientEmail: recipientData.email}
             socket.send(JSON.stringify(ask))
@@ -115,7 +117,7 @@
     .data {
         position: absolute;
         top: 0;
-        width: 100%;
+        width: 100vw;
         height: 125px;
         background-color: black;
         border-bottom: 2px solid rgb(165, 16, 110);
@@ -123,9 +125,10 @@
     }
 
     .data section {
-        margin-left: 25px;
-        margin-top: 25px;
-        width: 300px;
+        position: absolute;
+        left: 320px;
+        top: 25px;
+        width: 70%;
         height: 70px;
     }
 
@@ -198,7 +201,7 @@
         width: 75%;
         height: 75%;
         background-color: black;
-        bottom: 50px;
+        top: 150px;
         left: 350px;
         display: flex;
         justify-content: center;
@@ -216,11 +219,12 @@
         width: 100%;
         height: 35px;
         position: absolute;
+        text-align: center;
         bottom: 5px;
     }
 
     input {
-        width: 90%;
+        width: 85%;
         margin-right: 10px;
         margin-left: 15px;
         height: 30px;
@@ -262,5 +266,100 @@
     ::-webkit-scrollbar-thumb:hover {
         background: rgba(165, 16, 110, 0.4); 
     }
+
+    @media only screen and (max-width: 1400px) {
+        .menu {
+            width: 250px;
+        }
+
+        .menu section {
+            margin-left: 30px;
+            margin-top: 55px;
+        }
+
+        .data section {
+            left: 270px;
+            width: 60%;
+        }
+
+        .messenger {
+            width: 70%;
+            height: 75%;
+            left: 300px;
+        }
+
+        input {
+            width: 80%;
+        }
+    }
+
+    @media only screen and (max-width: 1000px) {
+        .menu {
+            width: 200px;
+            font-size: 20px;
+        }
+
+        .menu section {
+            margin-left: 30px;
+            margin-top: 55px;
+        }
+
+        .data section {
+            left: 220px;
+            width: 50%;
+        }
+
+        .messenger {
+            width: 65%;
+            height: 75%;
+            left: 225px;
+        }
+
+        input {
+            width: 65%;
+        }
+    }
+
+    @media only screen and (max-width: 650px) {
+        .menu {
+            width: 125px;
+            font-size: 15px;
+        }
+
+        .data {
+            height: 70px;
+        }
+
+        .menu section {
+            margin-left: 5px;
+            margin-top: 55px;
+        }
+
+        .menu .exit {
+            left: 2px;
+            font-size: 20px;
+            width: 120px;
+            height: 50px;
+        }
+
+        .data section {
+            font-size: 20px;
+            top: 5px;
+            left: 140px;
+            width: 50%;
+        }
+
+        .messenger {
+            width: 65%;
+            height: 80%;
+            left: 150px;
+            top: 100px;
+        }
+
+        input {
+            width: 55%;
+        }
+    }
+
 
 </style>

@@ -5,11 +5,11 @@
             <section>
                 <p>nick: {{ user.nickname }}</p>
                 <p>email: {{ user.email }}</p>
-                <p>password: EMPTY NOW</p>
             </section>
         </div>
         <div class="menu">
-            <section v-if="room">
+            <section>
+                <h1>Room data</h1>
                 <p>Room nr {{ room.id }}</p>
                 <p>Room name: {{ room.name }}</p>
                 <p>Room password: {{ room.password }}</p>
@@ -19,8 +19,15 @@
         </div>
         <div class="messenger">
             <div class="message-container">
-                <div class="sended-text">siema</div>
-                <div class="received-text">Heelloaaaaaaaaaaaaaaaaaaaaaaaaaaaaaoaaaaaaaaaaaaaaaaaaaaaaaaaaaaa</div>
+                <div class="sended-text">
+                    <div class="message-box">ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss</div>
+                </div>
+                <div class="received-text">
+                    <div class="message-box">sssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss</div>
+                </div>
+                <div class="received-text">
+                    <div class="message-box">sssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss</div>
+                </div>
             </div>
             <div class="writing-space">
                 <form @submit.prevent="">
@@ -75,9 +82,11 @@
         display: flex;
     }
 
-    section {
-        width: 400px;
-        height: 50px;
+    .data section {
+        margin-left: 25px;
+        margin-top: 25px;
+        width: 300px;
+        height: 70px;
     }
 
     p {
@@ -95,6 +104,22 @@
         border-right: 2px solid rgb(165, 16, 110);
         border-top-right-radius: 50px;
     }
+
+    .menu section {
+        margin-left: 55px;
+        margin-top: 55px;
+    }
+
+    .menu h1 {
+        color: #FFFFFF;
+        font-family: Cursive;
+        font-weight: 600;
+        font-size: 1.5em;
+        text-shadow:
+            0 0 10px rgba(255, 255, 255, .7),
+            0 0 20px rgba(255, 255, 255, .7);
+    }
+
 
     .menu .exit {
         position: absolute;
@@ -126,26 +151,39 @@
         left: 350px;
         display: flex;
         justify-content: center;
+        border-radius: 15px;
     }
 
     .message-container {
-        background-color: #FFFF;
         height: 90%;
         width: 95%;
         display: block;
+        overflow-y: auto;
     }
 
     .sended-text {
-        max-width: 100%;
+        width: 100%;
+        display: flex;
+        justify-content: right;
         height: auto;
-        text-align: right;
-        background-color: green;
     }
 
     .received-text {
-        max-width: 100%;
+        width: 100%;
+        display: flex;
         height: auto;
-        background-color: pink;
+    }
+
+    .message-box {
+        background-color: rgba(46, 45, 45, 0.288);
+        border: 1px solid purple;
+        border-radius: 10px;
+        padding: 2px 5px;
+        margin: 15px 10px;
+        max-width: 70%;
+        overflow: auto;
+        height: auto;
+        word-wrap: break-word;
     }
 
     .writing-space {
@@ -179,6 +217,24 @@
 
     .writing-space button:hover {
         background-color: rgb(51, 1, 49);
+    }
+
+    ::-webkit-scrollbar {
+        width: 20px;
+    }
+
+    ::-webkit-scrollbar-track {
+        box-shadow: inset 0 0 5px rgba(92, 91, 91, 0.534); 
+        border-radius: 20px;
+    }
+    
+    ::-webkit-scrollbar-thumb {
+        background: rgba(104, 7, 68, 0.3); 
+        border-radius: 20px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: rgba(165, 16, 110, 0.4); 
     }
 
 </style>

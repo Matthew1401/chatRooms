@@ -69,6 +69,15 @@ wss.on('connection', (socket) => {
         }
       });
     }
+    else if (data.status === 'sending-user') {
+      console.log(data.user)
+      console.log(data.recipientEmail)
+      connectedUsers[data.recipientEmail].socket.send(JSON.stringify({
+        status: 'user',
+        nickname: data.user.nickname,
+        email: data.user.email
+      }))
+    }
     else if (data.status === 'message') {
       // Sprawdź, czy odbiorca istnieje w connectedUsers
       const recipientSocket = connectedUsers[data.recipientEmail]?.socket;

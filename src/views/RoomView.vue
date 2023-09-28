@@ -23,14 +23,16 @@
                     <div class="message-box">ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss</div>
                 </div>
                 <div class="received-text">
+                    <p>Mateuszek56:</p>
                     <div class="message-box">sssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss</div>
                 </div>
                 <div class="received-text">
-                    <div class="message-box">sssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss</div>
+                    <p>Mateuszek56:</p>
+                    <div class="message-box">Dane kolegi: {{ recipientData.nickname }}, {{ recipientData.email }}</div>
                 </div>
             </div>
             <div class="writing-space">
-                <form @submit.prevent="">
+                <form @submit.prevent="console.log(recipientData)">
                     <input type="text">
                     <button type="submit">Send</button>
                 </form>
@@ -40,12 +42,23 @@
 </template>
 
 <script setup>
-    import { onMounted } from 'vue';
+    import { onMounted, reactive, onBeforeMount } from 'vue';
     import { useRouter } from 'vue-router'
 
     const router = useRouter()
 
     const { socket, user, room } = defineProps(['socket', 'user', 'room'])
+    const recipientData = reactive({
+        nickname: '',
+        email: ''
+    })
+
+    onBeforeMount(() => {
+        if (user.email !== room.user.email) {
+            recipientData.nickname = room.user.nickname
+            recipientData.email = room.user.email
+        }
+    })
 
     onMounted(() => {
         if (user.email == '' || user.nickname == '') {
@@ -61,6 +74,15 @@
         let ask = {status: 'give-rooms'}
         socket.send(JSON.stringify(ask))
         router.push(`/rooms`)
+    }
+
+    socket.onmessage = (event) => {
+        const message = JSON.parse(event.data)
+        console.log(message)
+        if (message.status == 'user') {
+            recipientData.nickname = message.nickname
+            recipientData.email = message.email
+        }
     }
 
 </script>
@@ -172,6 +194,13 @@
         width: 100%;
         display: flex;
         height: auto;
+        position: relative;
+    }
+
+    .received-text p {
+        position: absolute;
+        top: -25px;
+        left: 10px;
     }
 
     .message-box {

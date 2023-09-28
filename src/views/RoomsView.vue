@@ -103,6 +103,10 @@
     }
 
     const onEnterToRoom = (room) => {
+        if ( room.user.email !== user.email) {
+            let ask = {status: 'sending-user', user: user, recipientEmail: room.user.email}
+            socket.send(JSON.stringify(ask))
+        }
         emits('enter-to-room', room)
         router.push(`/room/${room.id}`)
     }

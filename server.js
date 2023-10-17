@@ -9,7 +9,7 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: `http://172.20.10.2:5173`,
+    origin: `*`,
   },
 });
 
@@ -75,7 +75,6 @@ io.on("connection", (socket) => {
 
   socket.on("giveDataToRoom", (data) => {
     data = JSON.parse(data);
-    console.log(data);
     connectedUsers[data.recipientEmail].socket.emit(
       "user",
       JSON.stringify({
@@ -105,7 +104,7 @@ io.on("connection", (socket) => {
     io.sockets.sockets.forEach((client) => {
       if (client !== socket) {
         // Wyślij wiadomość do wszystkich klientów
-        client.emit('deleteRoom', JSON.stringify(data));
+        client.emit("deleteRoom", JSON.stringify(data));
       }
     });
   });
@@ -113,24 +112,20 @@ io.on("connection", (socket) => {
   socket.on("message", (data) => {
     data = JSON.parse(data);
 
-    if (data.status === "message") {
-      // Sprawdź, czy odbiorca istnieje w connectedUsers
-      const recipientSocket = connectedUsers[data.recipientEmail]?.socket;
+    var recipientSocket = connectedUsers[data.recipientEmail]?.socket;
 
-      if (recipientSocket) {
-        // Jeśli odbiorca istnieje, przekaż mu wiadomość
-        recipientSocket.emit(
-          'message',
-          JSON.stringify({
-            message: data.message,
-          })
-        );
-        console.log(
-          `Message sent from ${data.senderUsername} to ${data.recipientEmail}: ${data.message}`
-        );
-      } else {
-        console.log(`Recipient ${data.recipientEmail} not found.`);
-      }
+    if (recipientSocket) {
+      recipientSocket.emit(
+        "message",
+        JSON.stringify({
+          message: data.message,
+        })
+      );
+      console.log(
+        `Message sent from ${data.senderUsername} to ${data.recipientEmail}: ${data.message}`
+      );
+    } else {
+      console.log(`Recipient ${data.recipientEmail} not found.`);
     }
   });
 
@@ -146,9 +141,9 @@ io.on("connection", (socket) => {
             rooms.splice(i, 1);
             // Wysyłanie pokoju do każdego z użytkowników
             io.sockets.sockets.forEach((client) => {
-              if (client.readyState === WebSocket.OPEN) {
+              if (client !== socket) {
                 // Wyślij wiadomość do wszystkich klientów
-                client.emit(JSON.stringify(rooms), message);
+                client.emit("rooms", JSON.stringify(rooms));
               }
             });
             break;

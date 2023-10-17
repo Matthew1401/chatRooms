@@ -226,7 +226,6 @@ main {
 
 h1 {
   color: #ffffff;
-  font-family: Cursive;
   margin-top: 35px;
   font-weight: 600;
   font-size: 1.5em;
@@ -274,7 +273,6 @@ p {
   height: 1.7em;
   background-color: rgb(10, 0, 7);
   color: white;
-  font-family: Poppins;
   border: 2px solid rgba(105, 6, 69, 0.253);
   border-radius: 10px;
   cursor: pointer;
@@ -327,7 +325,7 @@ p {
   display: flex;
   justify-content: center;
   flex-wrap: wrap;
-  overflow-y: auto;
+  overflow-y: scroll;
 }
 
 ::-webkit-scrollbar {
@@ -399,6 +397,10 @@ p {
     background-color: unset;
     border: unset;
     box-shadow: unset;
+  }
+
+  .rooms {
+    -webkit-overflow-scrolling: touch;
   }
 
   .menu:hover {

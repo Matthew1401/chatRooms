@@ -16,8 +16,8 @@
         <h2>Connected user:</h2>
         <p>{{ recipientData.nickname }}</p>
       </section>
-      <button class="exit" @click="exitRoom">Exit room</button>
     </div>
+    <button class="exit" @click="exitRoom">Exit room</button>
     <div class="messenger">
       <div class="message-container">
         <Messages
@@ -57,6 +57,10 @@ const data = reactive({
 });
 
 onBeforeMount(() => {
+  if (user.email == "" || user.nickname == "") {
+    router.push(`/`);
+  }
+
   if (user.email !== room.user.email) {
     recipientData.nickname = room.user.nickname;
     recipientData.email = room.user.email;
@@ -64,19 +68,14 @@ onBeforeMount(() => {
 });
 
 onMounted(() => {
-  if (user.email == "" || user.nickname == "") {
-    router.push(`/`);
-  }
-
   socket.on("user", (event) => {
-    event = JSON.stringify(event);
-    console.log(event.nickname);
+    event = JSON.parse(event);
     recipientData.nickname = event.nickname;
     recipientData.email = event.email;
   });
 
   socket.on("message", (event) => {
-    event = JSON.stringify(event);
+    event = JSON.parse(event);
     data.messageHistory.push({
       sended: false,
       id: data.messageId,
@@ -92,11 +91,10 @@ const sendMessage = () => {
   }
   if (recipientData.email.length > 0) {
     let ask = {
-      status: "message",
       message: data.message,
       recipientEmail: recipientData.email,
     };
-    socket.send(JSON.stringify(ask));
+    socket.emit("message", JSON.stringify(ask));
   }
   data.messageHistory.push({
     sended: true,
@@ -120,6 +118,8 @@ const exitRoom = () => {
 main {
   position: relative;
   color: #ffff;
+  width: 100vw;
+  height: 100vh;
 }
 
 .data {
@@ -163,7 +163,6 @@ p {
 
 .menu h1 {
   color: #ffffff;
-  font-family: Cursive;
   font-weight: 600;
   font-size: 1.5em;
   margin: 0;
@@ -173,7 +172,6 @@ p {
 
 .menu h2 {
   color: #ffffff;
-  font-family: Cursive;
   font-weight: 500;
   font-size: 1em;
   margin: 0;
@@ -181,24 +179,23 @@ p {
     0 0 20px rgba(255, 255, 255, 0.7);
 }
 
-.menu .exit {
+.exit {
   position: absolute;
   bottom: 20px;
   left: 25px;
-  font-size: 1em;
+  font-size: 25px;
   width: 8em;
   margin-top: 7px;
   height: 1.7em;
   background-color: rgb(10, 0, 7);
   color: white;
-  font-family: Cursive;
   border: 2px solid rgba(105, 6, 69, 0.253);
   border-radius: 10px;
   cursor: pointer;
   transition: transform ease 0.3s;
 }
 
-.menu button:hover {
+.exit:hover {
   transform: translateX(5px);
 }
 
@@ -245,7 +242,6 @@ input {
   font-size: 0.8em;
   border-radius: 5px;
   cursor: pointer;
-  font-family: Cursive;
   color: white;
   background-color: rgba(122, 0, 117, 1);
   transition: all 0.3s;
@@ -310,6 +306,10 @@ input {
     margin-top: 55px;
   }
 
+  .exit {
+    font-size: 20px;
+  }
+
   .data section {
     left: 220px;
     width: 50%;
@@ -328,37 +328,29 @@ input {
 
 @media only screen and (max-width: 650px) {
   .menu {
-    width: 125px;
-    font-size: 15px;
+    display: none;
   }
 
   .data {
     height: 70px;
   }
 
-  .menu section {
-    margin-left: 5px;
-    margin-top: 55px;
-  }
-
-  .menu .exit {
-    left: 2px;
-    font-size: 20px;
-    width: 120px;
-    height: 50px;
+  .exit {
+    left: 60%;
+    top: 10px;
   }
 
   .data section {
     font-size: 20px;
     top: 5px;
-    left: 140px;
-    width: 50%;
+    left: 20px;
+    width: 175px;
   }
 
   .messenger {
-    width: 65%;
+    width: 100%;
     height: 80%;
-    left: 150px;
+    left: 0;
     top: 100px;
   }
 

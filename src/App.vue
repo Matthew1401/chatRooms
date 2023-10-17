@@ -10,7 +10,7 @@
 
 <script setup>
 import { RouterView } from "vue-router";
-import { ref, reactive } from "vue";
+import { reactive } from "vue";
 import { io } from "socket.io-client";
 
 let hostname = window.location.host.split(":")[0];

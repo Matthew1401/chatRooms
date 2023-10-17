@@ -1,365 +1,369 @@
 <template>
-    <main>
-        <div class="data">
-            <section>
-                <p>nick: {{ user.nickname }}</p>
-                <p>email: {{ user.email }}</p>
-            </section>
-        </div>
-        <div class="menu">
-            <section>
-                <h1>Room data</h1>
-                <p>Room nr: {{ room.id }}</p>
-                <p>Room name: {{ room.name }}</p>
-                <p>Room creator: {{ room.user.nickname }}</p>
-                <br>
-                <h2>Connected user:</h2>
-                <p>{{ recipientData.nickname }}</p>
-            </section>
-            <button class="exit" @click="exitRoom">Exit room</button>
-        </div>
-        <div class="messenger">
-            <div class="message-container">
-                <Messages 
-                    v-for="message in data.messageHistory"
-                    :key="message.id"
-                    :message="message"
-                    :nickname="recipientData.nickname"
-                />
-            </div>
-            <div class="writing-space">
-                <form @submit.prevent="sendMessage">
-                    <input type="text" v-model.trim="data.message">
-                    <button type="submit">Send</button>
-                </form>
-            </div>
-        </div>
-    </main>
+  <main>
+    <div class="data">
+      <section>
+        <p>nick: {{ user.nickname }}</p>
+        <p>email: {{ user.email }}</p>
+      </section>
+    </div>
+    <div class="menu">
+      <section>
+        <h1>Room data</h1>
+        <p>Room nr: {{ room.id }}</p>
+        <p>Room name: {{ room.name }}</p>
+        <p>Room creator: {{ room.user.nickname }}</p>
+        <br />
+        <h2>Connected user:</h2>
+        <p>{{ recipientData.nickname }}</p>
+      </section>
+      <button class="exit" @click="exitRoom">Exit room</button>
+    </div>
+    <div class="messenger">
+      <div class="message-container">
+        <Messages
+          v-for="message in data.messageHistory"
+          :key="message.id"
+          :message="message"
+          :nickname="recipientData.nickname"
+        />
+      </div>
+      <div class="writing-space">
+        <form @submit.prevent="sendMessage">
+          <input type="text" v-model.trim="data.message" />
+          <button type="submit">Send</button>
+        </form>
+      </div>
+    </div>
+  </main>
 </template>
 
 <script setup>
-    import { onMounted, reactive, onBeforeMount } from 'vue';
-    import { useRouter } from 'vue-router'
-    import Messages from '../components/Messages.vue'
+import { onMounted, reactive, onBeforeMount } from "vue";
+import { useRouter } from "vue-router";
+import Messages from "../components/Messages.vue";
 
-    const router = useRouter()
+const router = useRouter();
 
-    const { socket, user, room } = defineProps(['socket', 'user', 'room'])
-    const recipientData = reactive({
-        nickname: '',
-        email: ''
-    })
+const { socket, user, room } = defineProps(["socket", "user", "room"]);
+const recipientData = reactive({
+  nickname: "",
+  email: "",
+});
 
-    const data = reactive({
-        message: '',
-        messageId: 1,
-        messageHistory: []
-    })
+const data = reactive({
+  message: "",
+  messageId: 1,
+  messageHistory: [],
+});
 
-    onBeforeMount(() => {
-        if (user.email !== room.user.email) {
-            recipientData.nickname = room.user.nickname
-            recipientData.email = room.user.email
-        }
-    })
+onBeforeMount(() => {
+  if (user.email !== room.user.email) {
+    recipientData.nickname = room.user.nickname;
+    recipientData.email = room.user.email;
+  }
+});
 
-    onMounted(() => {
-        if (user.email == '' || user.nickname == '') {
-            router.push(`/`)
-        }
-    })
+onMounted(() => {
+  if (user.email == "" || user.nickname == "") {
+    router.push(`/`);
+  }
 
-    const sendMessage = () => {
-        if (data.message == '') {
-            return
-        }
-        if (recipientData.email.length > 0) {
-            let ask = {status: 'message', message: data.message, recipientEmail: recipientData.email}
-            socket.send(JSON.stringify(ask))
-        }
-        data.messageHistory.push({sended: true, id: data.messageId, message: data.message })
-        data.messageId++
-        data.message = ''
-    }
+  socket.on("user", (event) => {
+    event = JSON.stringify(event);
+    console.log(event.nickname);
+    recipientData.nickname = event.nickname;
+    recipientData.email = event.email;
+  });
 
-    const exitRoom = () => {
-        if (user.email == room.user.email) {
-            let ask = {status: 'delete-room', id: room.id}
-            socket.send(JSON.stringify(ask))
-        }
-        let ask = {status: 'give-rooms'}
-        socket.send(JSON.stringify(ask))
-        router.push(`/rooms`)
-    }
+  socket.on("message", (event) => {
+    event = JSON.stringify(event);
+    data.messageHistory.push({
+      sended: false,
+      id: data.messageId,
+      message: event.message,
+    });
+    data.messageId++;
+  });
+});
 
-    socket.onmessage = (event) => {
-        const message = JSON.parse(event.data)
-        console.log(message)
-        if (message.status == 'user') {
-            recipientData.nickname = message.nickname
-            recipientData.email = message.email
-        }
-        else if (message.status == 'message') {
-            data.messageHistory.push({sended: false, id: data.messageId, message: message.message })
-            data.messageId++
-        }
-    }
+const sendMessage = () => {
+  if (data.message == "") {
+    return;
+  }
+  if (recipientData.email.length > 0) {
+    let ask = {
+      status: "message",
+      message: data.message,
+      recipientEmail: recipientData.email,
+    };
+    socket.send(JSON.stringify(ask));
+  }
+  data.messageHistory.push({
+    sended: true,
+    id: data.messageId,
+    message: data.message,
+  });
+  data.messageId++;
+  data.message = "";
+};
 
+const exitRoom = () => {
+  if (user.email == room.user.email) {
+    socket.emit("deleteRoom", JSON.stringify({ id: room.id }));
+  }
+  socket.emit("giveRooms", "");
+  router.push(`/rooms`);
+};
 </script>
 
 <style scoped>
+main {
+  position: relative;
+  color: #ffff;
+}
 
-    main {
-        position: relative;
-        color: #FFFF;
-    }
+.data {
+  position: absolute;
+  top: 0;
+  width: 100vw;
+  height: 125px;
+  background-color: black;
+  border-bottom: 2px solid rgb(165, 16, 110);
+  display: flex;
+}
 
-    .data {
-        position: absolute;
-        top: 0;
-        width: 100vw;
-        height: 125px;
-        background-color: black;
-        border-bottom: 2px solid rgb(165, 16, 110);
-        display: flex;
-    }
+.data section {
+  position: absolute;
+  left: 320px;
+  top: 25px;
+  width: 70%;
+  height: 70px;
+}
 
-    .data section {
-        position: absolute;
-        left: 320px;
-        top: 25px;
-        width: 70%;
-        height: 70px;
-    }
+p {
+  color: #ffff;
+  height: 10px;
+  font-size: 0.6em;
+}
 
-    p {
-        color: #FFFF;
-        height: 10px;
-        font-size: 0.6em;
-    }
+.menu {
+  position: absolute;
+  left: 0;
+  width: 300px;
+  height: 100%;
+  background-color: black;
+  border-right: 2px solid rgb(165, 16, 110);
+  border-top-right-radius: 50px;
+}
 
-    .menu {
-        position: absolute;
-        left: 0;
-        width: 300px;
-        height: 100%;
-        background-color: black;
-        border-right: 2px solid rgb(165, 16, 110);
-        border-top-right-radius: 50px;
-    }
+.menu section {
+  margin-left: 55px;
+  margin-top: 55px;
+}
 
-    .menu section {
-        margin-left: 55px;
-        margin-top: 55px;
-    }
+.menu h1 {
+  color: #ffffff;
+  font-family: Cursive;
+  font-weight: 600;
+  font-size: 1.5em;
+  margin: 0;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.7),
+    0 0 20px rgba(255, 255, 255, 0.7);
+}
 
-    .menu h1 {
-        color: #FFFFFF;
-        font-family: Cursive;
-        font-weight: 600;
-        font-size: 1.5em;
-        margin: 0;
-        text-shadow:
-            0 0 10px rgba(255, 255, 255, .7),
-            0 0 20px rgba(255, 255, 255, .7);
-    }
+.menu h2 {
+  color: #ffffff;
+  font-family: Cursive;
+  font-weight: 500;
+  font-size: 1em;
+  margin: 0;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.7),
+    0 0 20px rgba(255, 255, 255, 0.7);
+}
 
-    .menu h2 {
-        color: #FFFFFF;
-        font-family: Cursive;
-        font-weight: 500;
-        font-size: 1em;
-        margin: 0;
-        text-shadow:
-            0 0 10px rgba(255, 255, 255, .7),
-            0 0 20px rgba(255, 255, 255, .7);
-    }
+.menu .exit {
+  position: absolute;
+  bottom: 20px;
+  left: 25px;
+  font-size: 1em;
+  width: 8em;
+  margin-top: 7px;
+  height: 1.7em;
+  background-color: rgb(10, 0, 7);
+  color: white;
+  font-family: Cursive;
+  border: 2px solid rgba(105, 6, 69, 0.253);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: transform ease 0.3s;
+}
 
-    .menu .exit {
-        position: absolute;
-        bottom: 20px;
-        left: 25px;
-        font-size: 1em;
-        width: 8em;
-        margin-top: 7px;
-        height: 1.7em;
-        background-color: rgb(10, 0, 7);
-        color: white;
-        font-family: Cursive;
-        border: 2px solid rgba(105, 6, 69, 0.253);
-        border-radius: 10px;
-        cursor: pointer;
-        transition: transform ease 0.3s;
-    }
+.menu button:hover {
+  transform: translateX(5px);
+}
 
-    .menu button:hover {
-       transform: translateX(5px);
-    }
+.messenger {
+  position: absolute;
+  width: 75%;
+  height: 75%;
+  background-color: black;
+  top: 150px;
+  left: 350px;
+  display: flex;
+  justify-content: center;
+  border-radius: 15px;
+}
 
-    .messenger {
-        position: absolute;
-        width: 75%;
-        height: 75%;
-        background-color: black;
-        top: 150px;
-        left: 350px;
-        display: flex;
-        justify-content: center;
-        border-radius: 15px;
-    }
+.message-container {
+  height: 90%;
+  width: 95%;
+  display: block;
+  overflow-y: auto;
+}
 
-    .message-container {
-        height: 90%;
-        width: 95%;
-        display: block;
-        overflow-y: auto;
-    }
+.writing-space {
+  width: 100%;
+  height: 35px;
+  position: absolute;
+  text-align: center;
+  bottom: 5px;
+}
 
-    .writing-space {
-        width: 100%;
-        height: 35px;
-        position: absolute;
-        text-align: center;
-        bottom: 5px;
-    }
+input {
+  width: 85%;
+  margin-right: 10px;
+  margin-left: 15px;
+  height: 30px;
+  border: none;
+  border-radius: 5px;
+  padding: 0 15px;
+  font-size: 0.8em;
+}
 
-    input {
-        width: 85%;
-        margin-right: 10px;
-        margin-left: 15px;
-        height: 30px;
-        border: none;
-        border-radius: 5px;
-        padding: 0 15px;
-        font-size: 0.8em;
-    }
+.writing-space button {
+  border: 2px solid rgba(122, 0, 117, 1);
+  font-size: 0.8em;
+  border-radius: 5px;
+  cursor: pointer;
+  font-family: Cursive;
+  color: white;
+  background-color: rgba(122, 0, 117, 1);
+  transition: all 0.3s;
+}
 
-    .writing-space button {
-        border: 2px solid rgba(122,0,117,1);
-        font-size: 0.8em;
-        border-radius: 5px;
-        cursor: pointer;
-        font-family: Cursive;
-        color: white;
-        background-color: rgba(122,0,117,1);
-        transition: all 0.3s; 
-    }
+.writing-space button:hover {
+  background-color: rgb(51, 1, 49);
+}
 
-    .writing-space button:hover {
-        background-color: rgb(51, 1, 49);
-    }
+::-webkit-scrollbar {
+  width: 20px;
+}
 
-    ::-webkit-scrollbar {
-        width: 20px;
-    }
+::-webkit-scrollbar-track {
+  box-shadow: inset 0 0 5px rgba(92, 91, 91, 0.534);
+  border-radius: 20px;
+}
 
-    ::-webkit-scrollbar-track {
-        box-shadow: inset 0 0 5px rgba(92, 91, 91, 0.534); 
-        border-radius: 20px;
-    }
-    
-    ::-webkit-scrollbar-thumb {
-        background: rgba(104, 7, 68, 0.3); 
-        border-radius: 20px;
-    }
+::-webkit-scrollbar-thumb {
+  background: rgba(104, 7, 68, 0.3);
+  border-radius: 20px;
+}
 
-    ::-webkit-scrollbar-thumb:hover {
-        background: rgba(165, 16, 110, 0.4); 
-    }
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(165, 16, 110, 0.4);
+}
 
-    @media only screen and (max-width: 1400px) {
-        .menu {
-            width: 250px;
-        }
+@media only screen and (max-width: 1400px) {
+  .menu {
+    width: 250px;
+  }
 
-        .menu section {
-            margin-left: 30px;
-            margin-top: 55px;
-        }
+  .menu section {
+    margin-left: 30px;
+    margin-top: 55px;
+  }
 
-        .data section {
-            left: 270px;
-            width: 60%;
-        }
+  .data section {
+    left: 270px;
+    width: 60%;
+  }
 
-        .messenger {
-            width: 70%;
-            height: 75%;
-            left: 300px;
-        }
+  .messenger {
+    width: 70%;
+    height: 75%;
+    left: 300px;
+  }
 
-        input {
-            width: 80%;
-        }
-    }
+  input {
+    width: 80%;
+  }
+}
 
-    @media only screen and (max-width: 1000px) {
-        .menu {
-            width: 200px;
-            font-size: 20px;
-        }
+@media only screen and (max-width: 1000px) {
+  .menu {
+    width: 200px;
+    font-size: 20px;
+  }
 
-        .menu section {
-            margin-left: 30px;
-            margin-top: 55px;
-        }
+  .menu section {
+    margin-left: 30px;
+    margin-top: 55px;
+  }
 
-        .data section {
-            left: 220px;
-            width: 50%;
-        }
+  .data section {
+    left: 220px;
+    width: 50%;
+  }
 
-        .messenger {
-            width: 65%;
-            height: 75%;
-            left: 225px;
-        }
+  .messenger {
+    width: 65%;
+    height: 75%;
+    left: 225px;
+  }
 
-        input {
-            width: 65%;
-        }
-    }
+  input {
+    width: 65%;
+  }
+}
 
-    @media only screen and (max-width: 650px) {
-        .menu {
-            width: 125px;
-            font-size: 15px;
-        }
+@media only screen and (max-width: 650px) {
+  .menu {
+    width: 125px;
+    font-size: 15px;
+  }
 
-        .data {
-            height: 70px;
-        }
+  .data {
+    height: 70px;
+  }
 
-        .menu section {
-            margin-left: 5px;
-            margin-top: 55px;
-        }
+  .menu section {
+    margin-left: 5px;
+    margin-top: 55px;
+  }
 
-        .menu .exit {
-            left: 2px;
-            font-size: 20px;
-            width: 120px;
-            height: 50px;
-        }
+  .menu .exit {
+    left: 2px;
+    font-size: 20px;
+    width: 120px;
+    height: 50px;
+  }
 
-        .data section {
-            font-size: 20px;
-            top: 5px;
-            left: 140px;
-            width: 50%;
-        }
+  .data section {
+    font-size: 20px;
+    top: 5px;
+    left: 140px;
+    width: 50%;
+  }
 
-        .messenger {
-            width: 65%;
-            height: 80%;
-            left: 150px;
-            top: 100px;
-        }
+  .messenger {
+    width: 65%;
+    height: 80%;
+    left: 150px;
+    top: 100px;
+  }
 
-        input {
-            width: 55%;
-        }
-    }
-
-
+  input {
+    width: 55%;
+  }
+}
 </style>

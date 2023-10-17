@@ -1,115 +1,154 @@
 const express = require("express");
 const http = require("http");
-const WebSocket = require("ws");
+const { Server } = require("socket.io");
+
+const ip = "0.0.0.0"; // Twoje IP
+const port = 3000;
 
 const app = express();
 const server = http.createServer(app);
-const wss = new WebSocket.Server({ server });
+const io = new Server(server, {
+  cors: {
+    origin: `http://172.20.10.2:5173`,
+  },
+});
+
 const connectedUsers = {};
-const rooms = []
+const rooms = [];
 
+io.on("connection", (socket) => {
+  console.log("Client connected.");
 
-wss.on('connection', (socket) => {
-  console.log('Client connected.');
+  socket.on("login", (data) => {
+    data = JSON.parse(data);
+    // Sprawdź, czy użytkownik o podanym adresie e-mail już istnieje
+    if (connectedUsers[data.email]) {
+      socket.emit(
+        "login",
+        JSON.stringify({
+          status: "error",
+          message: "This email adress is curentlly in use.",
+        })
+      );
+      return;
+    } else if (data.username.length < 4 || data.username.length > 14) {
+      socket.emit(
+        "login",
+        JSON.stringify({
+          status: "error",
+          message: "Your nickname should contain from 4 to 14 characters.",
+        })
+      );
+      return;
+    }
 
-  socket.on('message', (data) => {
+    // Dodaj użytkownika do obiektu connectedUsers, używając jego email jako klucza
+    connectedUsers[data.email] = {
+      socket: socket,
+      username: data.username,
+    };
+    console.log(`${data.username} logged in.`);
+    // Wyślij odpowiedź zwrotną do klienta, że poprawnie zalogowano
+    socket.emit(
+      "login",
+      JSON.stringify({
+        message: "Succesfully",
+      })
+    );
+
+    if (rooms.length) {
+      socket.emit("rooms", JSON.stringify(rooms));
+    }
+  });
+
+  socket.on("addRoom", (data) => {
     data = JSON.parse(data);
 
-    if (data.status === 'login') {
-      // Sprawdź, czy użytkownik o podanym adresie e-mail już istnieje
-      if (connectedUsers[data.email]) {
-        // Jeśli istnieje, wyślij odpowiedź o błędzie i nie zaloguj użytkownika
-        socket.send(JSON.stringify({
-          status: 'error',
-          message: 'This email adress is curentlly in use.'
-        }));     
-        return;
+    rooms.push(data);
+    io.sockets.sockets.forEach((client) => {
+      if (client !== socket) {
+        // Wyślij wiadomość do wszystkich klientów, z wyjątkiem nadawcy
+        client.emit("room", JSON.stringify(data));
       }
+    });
+  });
 
-      // Dodaj użytkownika do obiektu connectedUsers, używając jego email jako klucza
-      connectedUsers[data.email] = {
-        socket: socket,
-        username: data.username,
-      };
-      console.log(`${data.username} logged in.`);
-      // Wyślij odpowiedź zwrotną do klienta, że poprawnie zalogowano
-      socket.send(JSON.stringify({
-          status: 'login',
-          message: 'Succesfully'
-        }));
-
-      if (rooms.length) {
-        socket.send(JSON.stringify(rooms))
-      }    
-    } 
-    else if (data.status === 'room') {
-      rooms.push(data);
-
-      wss.clients.forEach((client) => {
-        if (client !== socket && client.readyState === WebSocket.OPEN) {
-          // Wyślij wiadomość do wszystkich klientów, z wyjątkiem nadawcy
-          client.send(JSON.stringify(data));
-        }
-      });
-    }
-    else if (data.status === 'give-rooms') {
-      socket.send(JSON.stringify(rooms));
-    }
-    else if (data.status === 'delete-room') {
-      for (var i = 0; i<rooms.length; i++) {
-        if ( rooms[i].id == data.id) {
-          rooms.splice(i, 1)
-          break;
-        }
-      }
-      wss.clients.forEach((client) => {
-        if (client.readyState === WebSocket.OPEN) {
-          // Wyślij wiadomość do wszystkich klientów
-          client.send(JSON.stringify(rooms));
-        }
-      });
-    }
-    else if (data.status === 'sending-user') {
-      console.log(data.user)
-      console.log(data.recipientEmail)
-      connectedUsers[data.recipientEmail].socket.send(JSON.stringify({
-        status: 'user',
+  socket.on("giveDataToRoom", (data) => {
+    data = JSON.parse(data);
+    console.log(data);
+    connectedUsers[data.recipientEmail].socket.emit(
+      "user",
+      JSON.stringify({
         nickname: data.user.nickname,
-        email: data.user.email
-      }))
+        email: data.user.email,
+      })
+    );
+  });
+
+  socket.on("giveRooms", () => {
+    socket.emit(
+      "rooms",
+      JSON.stringify({
+        rooms,
+      })
+    );
+  });
+
+  socket.on("deleteRoom", (data) => {
+    data = JSON.parse(data);
+    for (var i = 0; i < rooms.length; i++) {
+      if (rooms[i].id == data.id) {
+        rooms.splice(i, 1);
+        break;
+      }
     }
-    else if (data.status === 'message') {
+    io.sockets.sockets.forEach((client) => {
+      if (client !== socket) {
+        // Wyślij wiadomość do wszystkich klientów
+        client.emit('deleteRoom', JSON.stringify(data));
+      }
+    });
+  });
+
+  socket.on("message", (data) => {
+    data = JSON.parse(data);
+
+    if (data.status === "message") {
       // Sprawdź, czy odbiorca istnieje w connectedUsers
       const recipientSocket = connectedUsers[data.recipientEmail]?.socket;
 
       if (recipientSocket) {
         // Jeśli odbiorca istnieje, przekaż mu wiadomość
-        recipientSocket.send(JSON.stringify({
-          status: 'message',
-          message: data.message,
-        }));
-        console.log(`Message sent from ${data.senderUsername} to ${data.recipientEmail}: ${data.message}`);
+        recipientSocket.emit(
+          'message',
+          JSON.stringify({
+            message: data.message,
+          })
+        );
+        console.log(
+          `Message sent from ${data.senderUsername} to ${data.recipientEmail}: ${data.message}`
+        );
       } else {
         console.log(`Recipient ${data.recipientEmail} not found.`);
       }
     }
   });
 
-  socket.on('close', () => {
+  socket.on("disconnect", () => {
     // Usuń użytkownika z connectedUsers po rozłączeniu
     for (const email in connectedUsers) {
       if (connectedUsers[email].socket === socket) {
         console.log(`${connectedUsers[email].username} disconnected.`);
         delete connectedUsers[email];
         // Usuwanie pokoju po odłączeniu użytkownika z serwera
-        for (var i = 0; i<rooms.length; i++) {    
-          if ( rooms[i].user.email == email) {  
-            rooms.splice(i, 1)
+        for (var i = 0; i < rooms.length; i++) {
+          if (rooms[i].user.email == email) {
+            rooms.splice(i, 1);
             // Wysyłanie pokoju do każdego z użytkowników
-            wss.clients.forEach((client) => {
+            io.sockets.sockets.forEach((client) => {
               if (client.readyState === WebSocket.OPEN) {
                 // Wyślij wiadomość do wszystkich klientów
-                client.send(JSON.stringify(rooms));
+                client.emit(JSON.stringify(rooms), message);
               }
             });
             break;
@@ -121,6 +160,6 @@ wss.on('connection', (socket) => {
   });
 });
 
-server.listen(3000, () => {
-  console.log("Websocket server started on port 3000");
+server.listen(port, ip, () => {
+  console.log(`Serwer nasłuchuje na http://${ip}:${port}`);
 });

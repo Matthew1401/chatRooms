@@ -17,7 +17,7 @@
 </template>
 
 <script setup>
-  import { reactive } from 'vue'
+  import { reactive, onMounted } from 'vue'
   import { useRouter } from 'vue-router'
   import Footer from '../components/Footer.vue'
 
@@ -49,22 +49,25 @@
         data.validData = 'Please enter a valid email address.'
       }
       else {  
-        const loginData = { status: 'login', username: data.user.nickname, email: data.user.email};
-        socket.send(JSON.stringify(loginData))
+        const loginData = { username: data.user.nickname, email: data.user.email};
+        socket.emit('login', JSON.stringify(loginData))
         data.validData = 'Error: connection with server failed.'
       }
     }
   }
 
-  socket.onmessage = (event) => {
-    const message = JSON.parse(event.data);
-    if (message.status === 'error') {
-      data.validData = message.message;
-    }
-    else {
-      emitFormSended(data.user)
-    }
-  }
+  onMounted(() => {
+    socket.on('login', (event) => {
+      const login = JSON.parse(event);
+      if (login.status === 'error') {
+        data.validData = login.message;
+      }
+      else {
+        emitFormSended(data.user)
+      }
+    })
+  });
+  
 </script>
 
 <style scoped>

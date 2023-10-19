@@ -299,7 +299,7 @@ p {
   text-align: center;
   position: absolute;
   font-size: 1.5em;
-  top: 15px;
+  top: 22px;
   width: 100%;
   text-shadow: 0 0 5px rgba(255, 255, 255, 0.7),
     0 0 10px rgba(255, 255, 255, 0.7), 0 0 15px rgba(255, 255, 255, 0.7);
@@ -318,6 +318,7 @@ p {
   height: 80%;
   border-radius: 10px;
   padding-top: 40px;
+  padding-bottom: 40px;
   transition: box-shadow ease 0.5s;
   box-shadow: inset 0 0 1em 10px rgba(165, 16, 110, 0.4),
     inset 0 0 1em 20px rgba(104, 7, 68, 0.3), 0 0 0 0 rgba(165, 16, 110, 0.4),
@@ -325,7 +326,7 @@ p {
   display: flex;
   justify-content: center;
   flex-wrap: wrap;
-  overflow-y: scroll;
+  overflow-y: auto;
 }
 
 ::-webkit-scrollbar {

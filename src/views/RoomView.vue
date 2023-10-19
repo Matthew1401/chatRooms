@@ -109,7 +109,7 @@ const exitRoom = () => {
   if (user.email == room.user.email) {
     socket.emit("deleteRoom", JSON.stringify({ id: room.id }));
   }
-  socket.emit("giveRooms", "");
+  socket.emit("giveRooms", JSON.stringify('hello im under the water'));
   router.push(`/rooms`);
 };
 </script>

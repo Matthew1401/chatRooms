@@ -11,12 +11,14 @@
       <form @submit.prevent="submitForm" name="form">
         <input
           type="text"
+          name="name"
           v-model.trim="data.user.nickname"
           placeholder="Enter your name"
         />
         <br />
         <input
           type="email"
+          name="email"
           v-model.trim="data.user.email"
           placeholder="Enter your email"
         />
@@ -48,27 +50,24 @@ const data = reactive({
 });
 
 const emitFormSended = (user) => {
-  data.validData = "";
   emits("form-sended", user);
   router.push(`/rooms`);
 };
 
 const submitForm = () => {
+  if (socket.connected == false) {
+    data.validData = "Error: connection with server failed.";
+    return;
+  }
+
   if (data.user.nickname.length < 4 || data.user.nickname.length > 14) {
     data.validData = "Your nickname should contain from 4 to 14 characters.";
   } else {
-    if (
-      !/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(data.user.email)
-    ) {
-      data.validData = "Please enter a valid email address.";
-    } else {
-      const loginData = {
-        username: data.user.nickname,
-        email: data.user.email,
-      };
-      socket.emit("login", JSON.stringify(loginData));
-      data.validData = "Error: connection with server failed.";
-    }
+    const loginData = {
+      username: data.user.nickname,
+      email: data.user.email,
+    };
+    socket.emit("login", JSON.stringify(loginData));
   }
 };
 
@@ -169,6 +168,10 @@ button:hover {
     font-size: 16px;
   }
 
+  h1 {
+    font-size: 3em;
+  }
+
   input {
     width: 14em;
   }
@@ -196,13 +199,13 @@ button:hover {
   }
 
   p {
-    width: 60%;
+    width: 70%;
   }
 
   .form-container {
-    width: 50%;
+    width: 70%;
     height: 450px;
-    margin-left: 24%;
+    margin-left: 15%;
     margin-top: 40px;
   }
 
@@ -233,7 +236,7 @@ button:hover {
   .form-container {
     width: 80%;
     height: 400px;
-    margin-left: 30px;
+    margin-left: 10%;
   }
 
   input {

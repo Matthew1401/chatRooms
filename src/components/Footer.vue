@@ -11,7 +11,6 @@
         text-align: center;
         bottom: 0;
         color: white;
-        font-family: Cursive;
         font-size: 0.6em;
     }
 

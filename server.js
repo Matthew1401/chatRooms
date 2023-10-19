@@ -13,6 +13,8 @@ const io = new Server(server, {
   },
 });
 
+const validator = require("email-validator");
+
 const connectedUsers = {};
 const rooms = [];
 
@@ -22,7 +24,17 @@ io.on("connection", (socket) => {
   socket.on("login", (data) => {
     data = JSON.parse(data);
     // Sprawdź, czy użytkownik o podanym adresie e-mail już istnieje
-    if (connectedUsers[data.email]) {
+    if (! validator.validate(data.email)) {
+      socket.emit(
+        "login",
+        JSON.stringify({
+          status: "error",
+          message: "Please enter a valid email address.",
+        })
+      );
+      return;
+    }
+    else if (connectedUsers[data.email]) {
       socket.emit(
         "login",
         JSON.stringify({
@@ -63,6 +75,7 @@ io.on("connection", (socket) => {
 
   socket.on("addRoom", (data) => {
     data = JSON.parse(data);
+    console.log(data)
 
     rooms.push(data);
     io.sockets.sockets.forEach((client) => {
@@ -85,12 +98,7 @@ io.on("connection", (socket) => {
   });
 
   socket.on("giveRooms", () => {
-    socket.emit(
-      "rooms",
-      JSON.stringify({
-        rooms,
-      })
-    );
+    socket.emit("rooms", JSON.stringify(rooms));
   });
 
   socket.on("deleteRoom", (data) => {

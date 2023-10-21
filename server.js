@@ -24,7 +24,7 @@ io.on("connection", (socket) => {
   socket.on("login", (data) => {
     data = JSON.parse(data);
     // Sprawdź, czy użytkownik o podanym adresie e-mail już istnieje
-    if (! validator.validate(data.email)) {
+    if (!validator.validate(data.email)) {
       socket.emit(
         "login",
         JSON.stringify({
@@ -33,8 +33,7 @@ io.on("connection", (socket) => {
         })
       );
       return;
-    }
-    else if (connectedUsers[data.email]) {
+    } else if (connectedUsers[data.email]) {
       socket.emit(
         "login",
         JSON.stringify({
@@ -75,7 +74,11 @@ io.on("connection", (socket) => {
 
   socket.on("addRoom", (data) => {
     data = JSON.parse(data);
-    console.log(data)
+
+    if (data.name.length < 4 || data.name.length > 14) {
+      socket.emit("error", 'Your room name should contain from 4 to 14 characters.');
+      return
+    }
 
     rooms.push(data);
     io.sockets.sockets.forEach((client) => {

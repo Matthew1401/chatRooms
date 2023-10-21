@@ -54,6 +54,14 @@
         </div>
       </div>
       <div class="rooms">
+        <div class="title">
+          <div class="id">Id</div>
+          <div class="name">Room Name</div>
+          <div class="host">Host Name</div>
+          <div class="number">Space</div>
+          <div class="password">Password required</div>
+        </div>
+
         <Room
           v-for="room in data.rooms"
           :key="room.id"
@@ -80,7 +88,6 @@ const data = reactive({
   validData: "",
   isRoomCreating: false,
   isPassword: false,
-  roomId: 1,
   rooms: [],
 });
 
@@ -115,6 +122,10 @@ onMounted(() => {
       }
     }
   });
+
+  socket.on("error", (event) => {
+    data.validData = event;
+  });
 });
 
 const exitButtonClicked = () => {
@@ -124,35 +135,26 @@ const exitButtonClicked = () => {
 };
 
 const createRoom = () => {
-  if (data.roomName.length < 4 || data.roomName.length > 15) {
-    data.validData = "Your room name should contain from 4 to 15 characters.";
-  } else {
-    if (data.rooms.length > 0) {
-      data.roomId = 1;
-      var roomsIds = [];
-      for (var i = 0; i < data.rooms.length; i++) {
-        roomsIds.push(data.rooms[i].id);
-      }
+  // if (data.rooms.length > 0) {
+  //   data.roomId = 1;
+  //   var roomsIds = [];
+  //   for (var i = 0; i < data.rooms.length; i++) {
+  //     roomsIds.push(data.rooms[i].id);
+  //   }
 
-      while (roomsIds.includes(data.roomId)) {
-        data.roomId++;
-      }
-    }
+  //   while (roomsIds.includes(data.roomId)) {
+  //     data.roomId++;
+  //   }
+  // }
 
-    var room = {
-      id: data.roomId,
-      user: user,
-      name: data.roomName,
-      password: data.roomPassword,
-    };
+  var room = {
+    user: user,
+    name: data.roomName,
+    password: data.roomPassword,
+  };
 
-    data.roomName = "";
-    data.roomPassword = "";
-    data.isRoomCreating = false;
-    socket.emit("addRoom", JSON.stringify(room));
-    data.roomId++;
-    onEnterToRoom(room);
-  }
+  socket.emit("addRoom", JSON.stringify(room));
+  onEnterToRoom(room);
 };
 
 const onEnterToRoom = (room) => {
@@ -311,6 +313,79 @@ p {
   top: 8px;
 }
 
+.title {
+  margin-left: 40px;
+  margin-right: 40px;
+  background-color: #5e064ffd;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: left;
+  font-size: 7em;
+  border: 2px solid black;
+  text-shadow: 0 0 5px rgba(255, 255, 255, 0.7),
+    0 0 15px rgba(255, 255, 255, 0.7);
+}
+
+.title > .id {
+  min-width: 50px;
+  width: 4%;
+  height: 100%;
+  font-size: 0.25em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-right: 4px solid black;
+}
+
+.title > .name {
+  min-width: 190px;
+  width: 15%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.2em;
+  color: #ffffff;
+  border-right: 4px solid black;
+}
+
+.title > .host {
+  min-width: 190px;
+  width: 15%;
+  height: 100%;
+  font-size: 0.2em;
+  text-align: center;
+  border-right: 4px solid black;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.title > .number {
+  min-width: 100px;
+  width: 10%;
+  height: 100%;
+  font-size: 0.2em;
+  text-align: center;
+  border-right: 4px solid black;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.title > .password {
+  min-width: 280px;
+  width: 20%;
+  height: 100%;
+  font-size: 0.2em;
+  text-align: center;
+  border-right: 4px solid black;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 .rooms {
   margin-top: 70px;
   background-color: black;
@@ -323,9 +398,7 @@ p {
   box-shadow: inset 0 0 1em 10px rgba(165, 16, 110, 0.4),
     inset 0 0 1em 20px rgba(104, 7, 68, 0.3), 0 0 0 0 rgba(165, 16, 110, 0.4),
     0 0 0 0 rgba(104, 7, 68, 0.3);
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
+  display: block;
   overflow-y: auto;
 }
 

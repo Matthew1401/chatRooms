@@ -1,6 +1,6 @@
 <template>
   <main>
-    <div class="hide-everything" v-if="data.isRoomCreating">
+    <div class="hide-everything" v-if="data.hideMenu">
       <div class="room-settings">
         <button @click="exitButtonClicked" class="exit">X</button>
         <h1>Room Settings</h1>
@@ -16,6 +16,16 @@
             placeholder="Password"
             v-model="data.roomPassword"
           />
+          <br />
+          <select name="number" id="number" v-model="data.roomCapacity">
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+            <option value="7">7</option>
+            <option value="8">8</option>
+          </select>
           <br />
           <button type="submit">Create</button>
         </form>
@@ -42,7 +52,7 @@
       <div class="menu">
         <div class="middle">Welcome {{ user.nickname }}</div>
         <div class="left1">
-          <button @click="data.isRoomCreating = true">Create room</button>
+          <button @click="data.hideMenu = true">Create room</button>
         </div>
         <div class="left2">
           <button @click="refresh">Refresh</button>
@@ -67,6 +77,7 @@
           :key="room.id"
           :room="room"
           @enter-to-room="onEnterToRoom"
+          :socket = "socket"
         />
       </div>
     </div>
@@ -85,8 +96,9 @@ const router = useRouter();
 const data = reactive({
   roomName: "",
   roomPassword: "",
+  roomCapacity: 2,
   validData: "",
-  isRoomCreating: false,
+  hideMenu: false,
   isPassword: false,
   rooms: [],
 });
@@ -95,21 +107,21 @@ const { socket, user } = defineProps(["socket", "user"]);
 const emits = defineEmits(["enter-to-room"]);
 
 onMounted(() => {
-  if (user.email == "" || user.nickname == "") {
+  if (user.email == "" || user.nickname == "" || user.id == 0) {
     router.push(`/`);
   }
 
   socket.on("room", (event) => {
     event = JSON.parse(event);
+    console.log(event);
     data.rooms.push(event);
-    data.roomId++;
   });
 
   socket.on("rooms", (event) => {
     event = JSON.parse(event);
-    for (var i = 0; i < event.length; i++) {
-      data.rooms.push(event[i]);
-      data.roomId++;
+
+    for (var i = 0; i < Object.keys(event); i++) {
+      data.rooms.push(event[Object.keys(event)[i]]);
     }
   });
 
@@ -126,45 +138,37 @@ onMounted(() => {
   socket.on("error", (event) => {
     data.validData = event;
   });
+
+  socket.on("roomAddedSuccesfully", (event) => {
+    event = JSON.parse(event);
+    onEnterToRoom(event);
+  });
 });
 
 const exitButtonClicked = () => {
   data.roomName = "";
   data.roomPassword = "";
-  data.isRoomCreating = false;
+  data.hideMenu = false;
 };
 
 const createRoom = () => {
-  // if (data.rooms.length > 0) {
-  //   data.roomId = 1;
-  //   var roomsIds = [];
-  //   for (var i = 0; i < data.rooms.length; i++) {
-  //     roomsIds.push(data.rooms[i].id);
-  //   }
-
-  //   while (roomsIds.includes(data.roomId)) {
-  //     data.roomId++;
-  //   }
-  // }
-
   var room = {
     user: user,
     name: data.roomName,
+    capacity: data.roomCapacity,
     password: data.roomPassword,
   };
 
   socket.emit("addRoom", JSON.stringify(room));
-  onEnterToRoom(room);
 };
 
 const onEnterToRoom = (room) => {
-  if (room.user.email !== user.email) {
-    let ask = {
-      user: user,
-      recipientEmail: room.user.email,
-    };
-    socket.emit("giveDataToRoom", JSON.stringify(ask));
-  }
+  let ask = {
+    nickname: user.nickname,
+    roomId: `${room.id}`,
+  };
+  socket.emit("giveDataToRoom", JSON.stringify(ask));
+
   emits("enter-to-room", room);
   router.push(`/room/${room.id}`);
 };
@@ -328,8 +332,7 @@ p {
 }
 
 .title > .id {
-  min-width: 50px;
-  width: 4%;
+  min-width: 60px;
   height: 100%;
   font-size: 0.25em;
   display: flex;
@@ -340,7 +343,7 @@ p {
 
 .title > .name {
   min-width: 190px;
-  width: 15%;
+  width: 20%;
   height: 100%;
   display: flex;
   align-items: center;
@@ -352,7 +355,7 @@ p {
 
 .title > .host {
   min-width: 190px;
-  width: 15%;
+  width: 20%;
   height: 100%;
   font-size: 0.2em;
   text-align: center;
@@ -390,10 +393,10 @@ p {
   margin-top: 70px;
   background-color: black;
   width: 100%;
-  height: 80%;
+  height: 70%;
   border-radius: 10px;
   padding-top: 40px;
-  padding-bottom: 40px;
+  padding-bottom: 80px;
   transition: box-shadow ease 0.5s;
   box-shadow: inset 0 0 1em 10px rgba(165, 16, 110, 0.4),
     inset 0 0 1em 20px rgba(104, 7, 68, 0.3), 0 0 0 0 rgba(165, 16, 110, 0.4),
@@ -443,6 +446,21 @@ p {
   .menu {
     height: 10em;
     display: flex;
+    box-shadow: none;
+    background: none;
+  }
+
+  .menu:hover {
+    box-shadow: none;
+  }
+
+  .menu button {
+    background-color: rgb(122, 6, 87);
+    color: white;
+    border: 2px solid rgb(88, 1, 56);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: transform ease 0.3s, box-shadow ease 0.5s;
   }
 
   .left1 {
@@ -464,21 +482,20 @@ p {
     text-align: center;
     top: 122px;
   }
-}
 
-@media only screen and (max-width: 500px) {
-  .menu {
-    background-color: unset;
-    border: unset;
-    box-shadow: unset;
+  .container {
+    width: 100%;
   }
 
   .rooms {
+    box-shadow: none;
+    background: none;
+    margin-top: 30px;
     -webkit-overflow-scrolling: touch;
   }
 
-  .menu:hover {
-    box-shadow: unset;
+  .rooms:hover {
+    box-shadow: none;
   }
 }
 </style>

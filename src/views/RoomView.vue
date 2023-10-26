@@ -11,10 +11,10 @@
         <h1>Room data</h1>
         <p>Room nr: {{ room.id }}</p>
         <p>Room name: {{ room.name }}</p>
-        <p>Room creator: {{ room.user.nickname }}</p>
+        <p>Room creator: {{ room.hostName }}</p>
         <br />
         <h2>Connected user:</h2>
-        <p>{{ recipientData.nickname }}</p>
+        <p v-for="roomUser in room.connectedUsers">{{ roomUser }}</p>
       </section>
     </div>
     <button class="exit" @click="exitRoom">Exit room</button>
@@ -45,10 +45,6 @@ import Messages from "../components/Messages.vue";
 const router = useRouter();
 
 const { socket, user, room } = defineProps(["socket", "user", "room"]);
-const recipientData = reactive({
-  nickname: "",
-  email: "",
-});
 
 const data = reactive({
   message: "",
@@ -57,13 +53,8 @@ const data = reactive({
 });
 
 onBeforeMount(() => {
-  if (user.email == "" || user.nickname == "") {
+  if (user.email == "" || user.nickname == "" || user.id == 0) {
     router.push(`/`);
-  }
-
-  if (user.email !== room.user.email) {
-    recipientData.nickname = room.user.nickname;
-    recipientData.email = room.user.email;
   }
 });
 

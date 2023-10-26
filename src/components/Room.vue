@@ -7,22 +7,31 @@
       {{ room.name }}
     </div>
     <div class="host">
-      {{ room.user.nickname }}
+      {{ room.hostName }}
     </div>
     <div class="number allowed">
-      1/2
+      {{ room.connectedUsers.length }}/{{ room.capacity }}
     </div>
     <div class="password not-allowed">Password required</div>
   </div>
 </template>
 
 <script setup>
-const { room } = defineProps(["room"]);
+import { onMounted } from "vue";
+
+const { room, socket } = defineProps(["room", "socket"]);
 const emits = defineEmits(["enterToRoom"]);
 
 const enterToRoom = () => {
   emits("enterToRoom", room);
 };
+
+onMounted(() => {
+  socket.on("connectUser", (event) => {
+    event = JSON.parse(event);
+    room.connectedUsers = event.connectedUsers;
+  });
+});
 </script>
 
 <style scoped>
@@ -42,8 +51,7 @@ const enterToRoom = () => {
 }
 
 .id {
-  min-width: 50px;
-  width: 4%;
+  min-width: 60px;
   height: 100%;
   font-size: 0.3em;
   display: flex;
@@ -54,7 +62,7 @@ const enterToRoom = () => {
 
 .name {
   min-width: 190px;
-  width: 15%;
+  width: 20%;
   height: 100%;
   display: flex;
   align-items: center;
@@ -66,7 +74,7 @@ const enterToRoom = () => {
 
 .host {
   min-width: 190px;
-  width: 15%;
+  width: 20%;
   height: 100%;
   font-size: 0.15em;
   text-align: center;
@@ -106,14 +114,12 @@ const enterToRoom = () => {
 
 .allowed {
   color: rgb(39, 207, 39);
-  text-shadow: 0 0 5px rgba(46, 224, 70, 0.7),
-    0 0 15px rgba(59, 230, 74, 0.7);
+  text-shadow: 0 0 5px rgba(46, 224, 70, 0.7), 0 0 15px rgba(59, 230, 74, 0.7);
 }
 
 .not-allowed {
   color: rgb(212, 20, 20);
-  text-shadow: 0 0 5px rgba(233, 60, 60, 0.7),
-    0 0 15px rgba(233, 71, 71, 0.7);
+  text-shadow: 0 0 5px rgba(233, 60, 60, 0.7), 0 0 15px rgba(233, 71, 71, 0.7);
 }
 
 /* @media only screen and (max-width: 1200px) {

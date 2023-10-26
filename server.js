@@ -9,14 +9,15 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: `*`,
+    origin: `http://mateuszkonieczny.netlify.app`,
   },
 });
 
 const validator = require("email-validator");
 
 const connectedUsers = {};
-const rooms = [];
+const rooms = {};
+const passwordsToRooms = {};
 
 io.on("connection", (socket) => {
   console.log("Client connected.");
@@ -53,55 +54,115 @@ io.on("connection", (socket) => {
       return;
     }
 
-    // Dodaj użytkownika do obiektu connectedUsers, używając jego email jako klucza
-    connectedUsers[data.email] = {
+    // Dodaj użytkownika do obiektu connectedUsers
+    var userId = 1;
+    if (Object.keys(connectedUsers).length > 0) {
+      while (Object.keys(connectedUsers).includes(userId.toString())) {
+        userId++;
+      }
+    }
+
+    connectedUsers[userId] = {
       socket: socket,
       username: data.username,
+      email: data.email,
     };
+
     console.log(`${data.username} logged in.`);
     // Wyślij odpowiedź zwrotną do klienta, że poprawnie zalogowano
     socket.emit(
       "login",
       JSON.stringify({
         message: "Succesfully",
+        userId: userId,
       })
     );
 
-    if (rooms.length) {
+    if (Object.keys(rooms).length) {
       socket.emit("rooms", JSON.stringify(rooms));
     }
+
+    socket.join("lobby");
   });
 
   socket.on("addRoom", (data) => {
     data = JSON.parse(data);
 
     if (data.name.length < 4 || data.name.length > 14) {
-      socket.emit("error", 'Your room name should contain from 4 to 14 characters.');
-      return
+      socket.emit(
+        "error",
+        "Your room name should contain from 4 to 14 characters."
+      );
+      return;
+    } else if (data.capacity < 2 || data.capacity > 8) {
+      socket.emit(
+        "error",
+        "Stop trying to destroy my site. Room capacity is from 2 to 8."
+      );
     }
 
-    rooms.push(data);
-    io.sockets.sockets.forEach((client) => {
-      if (client !== socket) {
-        // Wyślij wiadomość do wszystkich klientów, z wyjątkiem nadawcy
-        client.emit("room", JSON.stringify(data));
+    var isPassword = false;
+    if (!data.password == "") {
+      isPassword = true;
+    }
+
+    var roomId = 1;
+    if (rooms.length > 0) {
+      var roomsIds = [];
+
+      for (var i = 0; i < rooms.length; i++) {
+        roomsIds.push(rooms[i].id);
       }
-    });
+      while (roomsIds.includes(roomId)) {
+        roomId++;
+      }
+
+      var roomData = {
+        id: roomId,
+        hostId: data.user.id,
+        hostName: data.user.nickname,
+        name: data.name,
+        capacity: data.capacity,
+        connectedUsers: [],
+        isPassword: isPassword,
+      };
+    } else {
+      var roomData = {
+        id: 1,
+        hostId: data.user.id,
+        hostName: data.user.nickname,
+        name: data.name,
+        capacity: data.capacity,
+        connectedUsers: [],
+        isPassword: isPassword,
+      };
+    }
+
+    rooms[roomId] = roomData;
+    passwordsToRooms[roomData.id] = data.password;
+
+    socket.emit("roomAddedSuccesfully", JSON.stringify(roomData));
+
+    socket.to("lobby").emit("room", JSON.stringify(roomData));
   });
 
   socket.on("giveDataToRoom", (data) => {
     data = JSON.parse(data);
-    connectedUsers[data.recipientEmail].socket.emit(
-      "user",
-      JSON.stringify({
-        nickname: data.user.nickname,
-        email: data.user.email,
-      })
-    );
+
+    rooms[data.roomId].connectedUsers.push(data.nickname);
+    socket.join(`room${data.roomId}`);
+    socket.leave("lobby");
+
+    var sendToLobby = {
+      id: data.roomId,
+      connectedUsers: rooms[data.roomId].connectedUsers,
+    };
+    console.log(sendToLobby);
+    socket.to("lobby").emit("connectUser", JSON.stringify(sendToLobby));
   });
 
   socket.on("giveRooms", () => {
-    socket.emit("rooms", JSON.stringify(rooms));
+    socket.to("lobby").emit("rooms", JSON.stringify(rooms));
   });
 
   socket.on("deleteRoom", (data) => {
@@ -112,12 +173,7 @@ io.on("connection", (socket) => {
         break;
       }
     }
-    io.sockets.sockets.forEach((client) => {
-      if (client !== socket) {
-        // Wyślij wiadomość do wszystkich klientów
-        client.emit("deleteRoom", JSON.stringify(data));
-      }
-    });
+    socket.broadcast.emit("deleteRoom", JSON.stringify(data));
   });
 
   socket.on("message", (data) => {
@@ -151,12 +207,7 @@ io.on("connection", (socket) => {
           if (rooms[i].user.email == email) {
             rooms.splice(i, 1);
             // Wysyłanie pokoju do każdego z użytkowników
-            io.sockets.sockets.forEach((client) => {
-              if (client !== socket) {
-                // Wyślij wiadomość do wszystkich klientów
-                client.emit("rooms", JSON.stringify(rooms));
-              }
-            });
+            socket.broadcast.emit("rooms", JSON.stringify(rooms));
             break;
           }
         }

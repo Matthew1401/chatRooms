@@ -46,6 +46,7 @@ const data = reactive({
   user: {
     email: "",
     nickname: "",
+    id: 0,
   },
 });
 
@@ -77,6 +78,7 @@ onMounted(() => {
     if (login.status === "error") {
       data.validData = login.message;
     } else {
+      data.user.id = login.userId;
       emitFormSended(data.user);
     }
   });

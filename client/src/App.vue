@@ -10,7 +10,7 @@
 
 <script setup>
 import { RouterView } from "vue-router";
-import { reactive } from "vue";
+import { reactive, onMounted} from "vue";
 import { io } from "socket.io-client";
 
 const socket = io(`https://chat-rooms-backend.onrender.com`);
@@ -33,6 +33,13 @@ const onFormSended = (user) => {
 const onEnterToRoom = (room) => {
   data.room = room;
 };
+
+onMounted(() => {
+  socket.on('keep-alive', (data) => {
+  // Odbierz sygnał "keep-alive" od serwera
+  console.log(data.message);
+});
+})
 
 socket.onclose = () => {
   data.user.email = "";

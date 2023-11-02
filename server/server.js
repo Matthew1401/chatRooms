@@ -8,7 +8,7 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: `*`,
+    origin: `https://mateuszkonieczny.netlify.app`,
   },
 });
 
@@ -273,6 +273,11 @@ io.on("connection", (socket) => {
     }
   });
 });
+
+const keepAliveInterval = 10000; // co 10 sekund
+setInterval(() => {
+  io.sockets.emit("keep-alive", { message: "Ping" });
+}, keepAliveInterval);
 
 server.listen(port, () => {
   console.log(`Serwer nasłuchuje na porcie ${port}`);

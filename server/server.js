@@ -2,8 +2,7 @@ const express = require("express");
 const http = require("http");
 const { Server } = require("socket.io");
 
-const ip = "0.0.0.0"; // Twoje IP
-const port = 3000;
+const port = process.env.PORT || 3000;
 
 const app = express();
 const server = http.createServer(app);
@@ -185,9 +184,10 @@ io.on("connection", (socket) => {
       connectedUsers: rooms[data.roomId].connectedUsers,
     };
     socket.to("lobby").emit("changeUsersLobby", JSON.stringify(sendToLobby));
-    io
-      .in(`room${data.roomId}`)
-      .emit("changeUsersRoom", JSON.stringify(sendToLobby.connectedUsers));
+    io.in(`room${data.roomId}`).emit(
+      "changeUsersRoom",
+      JSON.stringify(sendToLobby.connectedUsers)
+    );
   });
 
   socket.on("userLeftRoom", (data) => {
@@ -274,6 +274,6 @@ io.on("connection", (socket) => {
   });
 });
 
-server.listen(port, ip, () => {
-  console.log(`Serwer nasłuchuje na http://${ip}:${port}`);
+server.listen(port, () => {
+  console.log(`Serwer nasłuchuje na porcie ${port}`);
 });

@@ -2,7 +2,10 @@
   <div
     :class="[message.sender == user.nickname ? 'sended-text' : 'received-text']"
   >
-    <p v-if="message.sender !== user.nickname">{{ message.sender }}:</p>
+    <p v-if="message.sender !== user.nickname">
+      {{ message.sender }}
+      <p v-if="message.sender !== ''">:</p>
+    </p>
     <Message :text="message.message" />
   </div>
 </template>

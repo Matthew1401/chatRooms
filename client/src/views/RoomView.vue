@@ -325,6 +325,14 @@ input {
 }
 
 @media only screen and (max-width: 650px) {
+  body {
+    background-image: none;
+  }
+
+  main {
+    background-color: black;
+  }
+
   .menu {
     display: none;
   }

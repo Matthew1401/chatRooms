@@ -465,7 +465,21 @@ p {
   }
 }
 
+@media only screen and (max-width: 1080px) {
+  .title > .host {
+    display: none;
+  }
+}
+
 @media only screen and (max-width: 900px) {
+  body {
+    background-image: none;
+  }
+
+  main {
+    background-color: black;
+  }
+  
   .menu {
     height: 10em;
     display: flex;
@@ -519,6 +533,12 @@ p {
 
   .rooms:hover {
     box-shadow: none;
+  }
+}
+
+@media only screen and (max-width: 730px) {
+  .title > .password {
+    display: none;
   }
 }
 </style>

@@ -146,14 +146,15 @@ onMounted(() => {
   text-shadow: 0 0 5px rgba(233, 60, 60, 0.7), 0 0 15px rgba(233, 71, 71, 0.7);
 }
 
-/* @media only screen and (max-width: 1200px) {
-  .room {
-    width: 200px;
-    height: 200px;
-    margin-left: 20px;
-    margin-right: 20px;
-    margin-top: 0;
-    margin-bottom: 20px;
+@media only screen and (max-width: 1080px) {
+  .host {
+    display: none;
   }
-} */
+}
+
+@media only screen and (max-width: 730px) {
+  .password {
+    display: none;
+  }
+}
 </style>

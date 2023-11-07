@@ -13,7 +13,8 @@ import { RouterView, useRouter } from "vue-router";
 import { reactive, onMounted} from "vue";
 import { io } from "socket.io-client";
 
-const socket = io(`https://chat-rooms-backend.onrender.com`);
+let hostname = window.location.host.split(":")[0];
+const socket = io(`http://${hostname}:3000`);
 const router = useRouter();
 
 const data = reactive({

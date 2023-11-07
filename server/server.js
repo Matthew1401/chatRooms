@@ -6,18 +6,18 @@ const port = process.env.PORT || 3000;
 
 const app = express();
 const server = http.createServer(app);
-// const io = new Server(server, {
-//   cors: {
-//     origin: "*",
-//   },
-// });
 const io = new Server(server, {
   cors: {
-    origin: "*", // Dodaj domenę, z której chcesz zaakceptować żądania
-    methods: ["GET", "POST"], // Określ dozwolone metody HTTP
-    credentials: true, // Jeśli wymagasz przesyłania plików cookie lub autoryzacji, ustaw to na true
+    origin: "*",
   },
 });
+// const io = new Server(server, {
+//   cors: {
+//     origin: "*", // Dodaj domenę, z której chcesz zaakceptować żądania
+//     methods: ["GET", "POST"], // Określ dozwolone metody HTTP
+//     credentials: true, // Jeśli wymagasz przesyłania plików cookie lub autoryzacji, ustaw to na true
+//   },
+// });
 
 const validator = require("email-validator");
 
@@ -337,5 +337,4 @@ setInterval(() => {
 
 server.listen(port, () => {
   console.log(`Serwer nasłuchuje na porcie ${port}`);
-  console.log("Konfiguracja CORS:", io.httpServer._events.cors);
 });

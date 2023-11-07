@@ -93,7 +93,6 @@ import Footer from "../components/Footer.vue";
 import Room from "../components/Room.vue";
 import { onMounted, reactive } from "vue";
 import { useRouter } from "vue-router";
-import { bcrypt } from "bcrypt";
 
 const router = useRouter();
 

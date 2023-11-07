@@ -10,10 +10,12 @@
 
 <script setup>
 import { RouterView, useRouter } from "vue-router";
-import { reactive, onMounted} from "vue";
+import { reactive, onMounted } from "vue";
 import { io } from "socket.io-client";
 
-const socket = io(`https://chat-rooms-backend.onrender.com`);
+const socket = io("https://chat-rooms-backend.onrender.com", {
+  withCredentials: true,
+});
 const router = useRouter();
 
 const data = reactive({
@@ -36,16 +38,16 @@ const onEnterToRoom = (room) => {
 };
 
 onMounted(() => {
-  socket.on('keep-alive', (data) => {
-  // Odbierz sygnał "keep-alive" od serwera
-  console.log(data.message);
+  socket.on("keep-alive", (data) => {
+    // Odbierz sygnał "keep-alive" od serwera
+    console.log(data.message);
+  });
 });
-})
 
 socket.onclose = () => {
   data.user.email = "";
   data.user.nickname = "";
   data.user.id = 0;
-  router.push('/');
+  router.push("/");
 };
 </script>

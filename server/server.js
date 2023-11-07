@@ -13,7 +13,7 @@ const server = http.createServer(app);
 // });
 const io = new Server(server, {
   cors: {
-    origin: "https://mateuszkonieczny.netlify.app/", // Dodaj domenę, z której chcesz zaakceptować żądania
+    origin: "*", // Dodaj domenę, z której chcesz zaakceptować żądania
     methods: ["GET", "POST"], // Określ dozwolone metody HTTP
     credentials: true, // Jeśli wymagasz przesyłania plików cookie lub autoryzacji, ustaw to na true
   },

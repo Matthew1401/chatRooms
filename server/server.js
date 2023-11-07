@@ -17,6 +17,7 @@ const validator = require("email-validator");
 const connectedUsers = {};
 const rooms = {};
 const passwordsToRooms = {};
+const messages = {};
 
 io.on("connection", (socket) => {
   console.log("Client connected.");
@@ -153,9 +154,11 @@ io.on("connection", (socket) => {
       return;
     }
 
-    if (!passwordsToRooms[data.roomId] == data.password) {
-      socket.emit("error", "Wrong password.");
-      return;
+    if (rooms[data.roomId].isPassword) {
+      if (passwordsToRooms[data.roomId] !== data.password) {
+        socket.emit("error", "Wrong password.");
+        return;
+      }
     }
 
     if (
@@ -188,10 +191,20 @@ io.on("connection", (socket) => {
       "changeUsersRoom",
       JSON.stringify(sendToLobby.connectedUsers)
     );
+
+    if (messages[data.roomId]) {
+      socket.emit("messages", JSON.stringify(messages[data.roomId]));
+    }
   });
 
   socket.on("userLeftRoom", (data) => {
     data = JSON.parse(data);
+
+    if (!rooms[data.id]) {
+      socket.leave(`room${data.id}`);
+      socket.join("lobby");
+      return;
+    }
 
     for (var i = 0; i < rooms[data.id].connectedUsers.length; i++) {
       if (rooms[data.id].connectedUsers[i] == data.nickname) {
@@ -223,8 +236,23 @@ io.on("connection", (socket) => {
     data = JSON.parse(data);
 
     delete rooms[data.id];
+    delete passwordsToRooms[data.id];
+
+    if (messages[data.roomId]) {
+      var message_id = messages[data.roomId].length + 1;
+    } else {
+      var message_id = 1;
+    }
+
+    let ask = {
+      id: message_id,
+      message: "HOST DISCONNECTED",
+      sender: "",
+    };
 
     socket.leave(`rooms${data.id}`);
+    io.in(`room${data.id}`).emit("host-disconnected", JSON.stringify(ask));
+    delete messages[data.id];
 
     socket.to("lobby").emit("deleteRoom", JSON.stringify(data));
     socket.join("lobby");
@@ -234,21 +262,25 @@ io.on("connection", (socket) => {
   socket.on("message", (data) => {
     data = JSON.parse(data);
 
-    var recipientSocket = connectedUsers[data.recipientEmail]?.socket;
-
-    if (recipientSocket) {
-      recipientSocket.emit(
-        "message",
-        JSON.stringify({
-          message: data.message,
-        })
-      );
-      console.log(
-        `Message sent from ${data.senderUsername} to ${data.recipientEmail}: ${data.message}`
-      );
+    if (messages[data.roomId]) {
+      var message_id = messages[data.roomId].length + 1;
     } else {
-      console.log(`Recipient ${data.recipientEmail} not found.`);
+      var message_id = 1;
     }
+
+    let ask = {
+      id: message_id,
+      message: data.message,
+      sender: data.sender,
+    };
+
+    if (!messages[data.roomId]) {
+      messages[data.roomId] = [ask];
+    } else {
+      messages[data.roomId].push(ask);
+    }
+
+    io.in(`room${data.roomId}`).emit("message", JSON.stringify(ask));
   });
 
   socket.on("disconnect", () => {
@@ -260,10 +292,25 @@ io.on("connection", (socket) => {
 
         // Usuwanie pokoju po odłączeniu użytkownika z serwera
         for (const i in rooms) {
-          console.log(`Proba nr ${i}`);
           if (rooms[i].hostId == id) {
             delete rooms[i];
-            // Wysyłanie pokoju do każdego z użytkowników
+            delete passwordsToRooms[i];
+
+            if (messages[i]) {
+              var message_id = messages[i].length + 1;
+            } else {
+              var message_id = 1;
+            }
+
+            let ask = {
+              id: message_id,
+              message: "HOST DISCONNECTED",
+              sender: "",
+            };
+
+            io.in(`room${i}`).emit("host-disconnected", JSON.stringify(ask));
+            delete messages[i];
+
             socket.to("lobby").emit("deleteRoom", JSON.stringify({ id: i }));
             break;
           }

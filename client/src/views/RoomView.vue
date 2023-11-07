@@ -24,7 +24,7 @@
           v-for="message in data.messageHistory"
           :key="message.id"
           :message="message"
-          :nickname="recipientData.nickname"
+          :user="user"
         />
       </div>
       <div class="writing-space">
@@ -48,7 +48,6 @@ const { socket, user, room } = defineProps(["socket", "user", "room"]);
 
 const data = reactive({
   message: "",
-  messageId: 1,
   messageHistory: [],
 });
 
@@ -59,20 +58,29 @@ onBeforeMount(() => {
 });
 
 onMounted(() => {
-  socket.on("message", (event) => {
-    event = JSON.parse(event);
-    data.messageHistory.push({
-      sended: false,
-      id: data.messageId,
-      message: event.message,
-    });
-    data.messageId++;
-  });
-
   socket.on("changeUsersRoom", (event) => {
-    console.log(event);
     event = JSON.parse(event);
     room.connectedUsers = event;
+  });
+
+  socket.on("messages", (event) => {
+    event = JSON.parse(event);
+    data.messageHistory = event;
+  });
+
+  socket.on("message", (event) => {
+    event = JSON.parse(event);
+    data.messageHistory.push(event);
+  });
+
+  socket.on("host-disconnected", (event) => {
+    event = JSON.parse(event);
+    data.messageHistory.push(event);
+    socket.emit("userLeftRoom", JSON.stringify({ id: room.id }));
+
+    setTimeout(function () {
+      router.push("/rooms");
+    }, 4000);
   });
 });
 
@@ -80,19 +88,14 @@ const sendMessage = () => {
   if (data.message == "") {
     return;
   }
-  if (recipientData.email.length > 0) {
-    let ask = {
-      message: data.message,
-      recipientEmail: recipientData.email,
-    };
-    socket.emit("message", JSON.stringify(ask));
-  }
-  data.messageHistory.push({
-    sended: true,
-    id: data.messageId,
+  let ask = {
     message: data.message,
-  });
-  data.messageId++;
+    sender: user.nickname,
+    roomId: room.id,
+  };
+
+  socket.emit("message", JSON.stringify(ask));
+
   data.message = "";
 };
 

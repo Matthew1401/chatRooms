@@ -337,4 +337,5 @@ setInterval(() => {
 
 server.listen(port, () => {
   console.log(`Serwer nasłuchuje na porcie ${port}`);
+  console.log("Konfiguracja CORS:", io.httpServer._events.cors);
 });

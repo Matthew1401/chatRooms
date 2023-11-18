@@ -4,7 +4,7 @@
   >
     <p v-if="message.sender !== user.nickname">
       {{ message.sender }}
-      <p v-if="message.sender !== ''">:</p>
+      <div v-if="message.sender !== ''">:</div>
     </p>
     <Message :text="message.message" />
   </div>
